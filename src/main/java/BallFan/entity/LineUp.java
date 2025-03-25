@@ -25,7 +25,7 @@ public class LineUp {
     @Column(name = "team")
     private Team team;
 
-    @Column(name = "order")
+    @Column(name = "`order`")
     private int order;
 
     @Column(name = "position")

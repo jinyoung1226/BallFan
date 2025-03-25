@@ -1,6 +1,6 @@
 package BallFan.authentication;
 
-import BallFan.dto.Response.ErrorResponse;
+import BallFan.authentication.filter.AuthExceptionHandlerFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,6 +20,6 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("utf-8");
         response.getWriter().write(objectMapper.writeValueAsString(
-                new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), "다시 로그인 해주세요")));
+                new AuthExceptionHandlerFilter.ErrorResponse(HttpStatus.UNAUTHORIZED.value(), "다시 로그인 해주세요")));
     }
 }
