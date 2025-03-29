@@ -22,6 +22,7 @@ public class LineUp {
     @Column(name = "name")
     private String name;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "team")
     private Team team;
 
