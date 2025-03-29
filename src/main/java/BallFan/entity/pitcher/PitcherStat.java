@@ -28,6 +28,7 @@ public class PitcherStat {
     @Column(name = "team")
     private Team team;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "pitcher_type")
     private PitcherType pitcherType;
 
