@@ -1,6 +1,6 @@
 package BallFan.repository;
 
-import BallFan.entity.User;
+import BallFan.entity.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

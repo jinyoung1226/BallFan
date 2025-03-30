@@ -3,7 +3,7 @@ package BallFan.service;
 import BallFan.authentication.JwtProvider;
 import BallFan.authentication.UserDetailsServiceImpl;
 import BallFan.dto.auth.SignInDTO;
-import BallFan.entity.User;
+import BallFan.entity.user.User;
 import BallFan.entity.token.BlackList;
 import BallFan.exception.auth.BlackListedTokenException;
 import BallFan.exception.auth.DifferentRefreshTokenException;

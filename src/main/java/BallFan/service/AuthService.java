@@ -5,7 +5,7 @@ import BallFan.authentication.UserDetailsServiceImpl;
 import BallFan.dto.auth.SignInDTO;
 import BallFan.dto.auth.SignInRequest;
 import BallFan.dto.auth.SignUpRequest;
-import BallFan.entity.User;
+import BallFan.entity.user.User;
 import BallFan.entity.token.BlackList;
 import BallFan.exception.auth.DuplicatedSignUpException;
 import BallFan.repository.BlackListRepository;

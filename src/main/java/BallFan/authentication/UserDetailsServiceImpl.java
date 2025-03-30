@@ -3,7 +3,7 @@ package BallFan.authentication;
 import java.util.Collection;
 import java.util.Collections;
 
-import BallFan.entity.User;
+import BallFan.entity.user.User;
 import BallFan.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;

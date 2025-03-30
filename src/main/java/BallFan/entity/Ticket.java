@@ -1,5 +1,6 @@
 package BallFan.entity;
 
+import BallFan.entity.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 

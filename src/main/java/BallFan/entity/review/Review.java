@@ -1,7 +1,7 @@
 package BallFan.entity.review;
 
 import BallFan.entity.Ticket;
-import BallFan.entity.User;
+import BallFan.entity.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
