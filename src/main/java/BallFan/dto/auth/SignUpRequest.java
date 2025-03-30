@@ -1,5 +1,6 @@
 package BallFan.dto.auth;
 
+import BallFan.entity.Team;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -9,4 +10,5 @@ public class SignUpRequest {
     private String email;
     private String password;
     private String nickname;
+    private Team team;
 }
