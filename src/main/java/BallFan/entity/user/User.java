@@ -49,9 +49,16 @@ public class User {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Ticket> tickets = new ArrayList<>();
 
-    @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserFollow> following = new ArrayList<>();
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
 
-    @OneToMany(mappedBy = "following", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserFollow> followers = new ArrayList<>();
+    public void updateTeam(Team team) {
+        this.team = team;
+    }
+
+    public void updateImage(String image) {
+        this.image = image;
+    }
+
 }
