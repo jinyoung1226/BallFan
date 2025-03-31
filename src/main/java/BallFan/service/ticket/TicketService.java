@@ -29,7 +29,12 @@ public class TicketService {
         try {
             MultipartBodyBuilder builder = new MultipartBodyBuilder();
 
-            builder.part("file", new ByteArrayResource(file.getBytes())).contentType(MediaType.APPLICATION_OCTET_STREAM); // 또는 IMAGE_PNG, IMAGE_JPEG
+            builder.part("file", new ByteArrayResource(file.getBytes()) {
+                @Override
+                public String getFilename() {
+                    return "dummy.png"; // 꼭 넣어야 함
+                }
+            }).contentType(MediaType.APPLICATION_OCTET_STREAM);
 
             webClient.post()
                     .uri("/upload_paperTicket")
