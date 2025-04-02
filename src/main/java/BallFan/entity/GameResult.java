@@ -39,10 +39,10 @@ public class GameResult {
     private String stadium;
 
     @Column(name = "score_home_team")
-    private int scoreHomeTeam;
+    private Integer scoreHomeTeam;
 
     @Column(name = "score_away_team")
-    private int scoreAwayTeam;
+    private Integer scoreAwayTeam;
 
     @OneToMany(mappedBy = "gameResult", fetch = FetchType.LAZY)
     private List<LineUp> lineUps = new ArrayList<>();
