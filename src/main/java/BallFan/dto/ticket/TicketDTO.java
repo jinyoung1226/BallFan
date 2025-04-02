@@ -1,4 +1,4 @@
-package BallFan.dto;
+package BallFan.dto.ticket;
 
 import BallFan.entity.GameResult;
 import BallFan.entity.Team;
@@ -22,7 +22,7 @@ public class TicketDTO {
     private LocalDate ticketDate;
     private String seat;
     private LocalDate createdDate;
-    private boolean isWin;
+    private Boolean isWin;
     private boolean hasReview;
     private User user;
     private GameResult gameResult;
