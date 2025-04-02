@@ -1,6 +1,7 @@
 package BallFan.dto.ticket;
 
 import BallFan.entity.Team;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,8 +18,11 @@ public class OcrTicketDTO {
 
     @JsonProperty("away_team")
     private Team awayTeam;
+
     @JsonProperty("ticket_date")
+    @JsonFormat(pattern = "yyyy/MM/dd")
     private LocalDate ticketDate;
+
     private String seat;
 
 }
