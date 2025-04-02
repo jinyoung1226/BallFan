@@ -22,4 +22,10 @@ public class TicketController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/phone")
+    public ResponseEntity<Void> registerPhoneTicket(@RequestPart MultipartFile file) {
+        ticketService.registerPhoneTicket(file);
+        return ResponseEntity.ok().build();
+    }
+
 }
