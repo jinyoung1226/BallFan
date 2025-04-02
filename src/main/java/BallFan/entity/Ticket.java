@@ -37,7 +37,7 @@ public class Ticket {
     private LocalDate createdDate;
 
     @Column(name = "is_win")
-    private boolean isWin;
+    private Boolean isWin;
 
     @Column(name = "has_review")
     private boolean hasReview;
