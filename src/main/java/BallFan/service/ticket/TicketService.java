@@ -30,6 +30,7 @@ public class TicketService {
     private final WebClient webClient;
     private final GameResultRepository gameResultRepository;
     private final TicketRepository ticketRepository;
+    private final ObjectMapper objectMapper;
 
     /**
      * 종이 티켓 이미지를 받아, 종이티켓 OCR 서버로 넘겨주는 메서드
@@ -37,8 +38,6 @@ public class TicketService {
      */
     public void registerPaperTicket(MultipartFile file) {
         User user = userDetailsService.getUserByContextHolder();
-
-        ObjectMapper mapper = new ObjectMapper();
 
         try {
             MultipartBodyBuilder builder = new MultipartBodyBuilder();
@@ -61,7 +60,7 @@ public class TicketService {
 
             // Json -> 객체로 역직렬화
             // annotation JsonProperty 설정해야 같은 이름으로 판정되어 인식함
-            OcrTicketDTO ocrTicketDTO = mapper.readValue(response, OcrTicketDTO.class);
+            OcrTicketDTO ocrTicketDTO = objectMapper.readValue(response, OcrTicketDTO.class);
 
             // OCR로 받은 어웨이팀과 날짜를 기반으로 경기 결과 DB를 조회하여 알맞는 경기 정보를 불러
             GameResult gameResult = gameResultRepository
@@ -120,7 +119,7 @@ public class TicketService {
                     .block();
 
             // Json -> 객체로 역직렬화
-            OcrTicketDTO ocrTicketDTO = mapper.readValue(response, OcrTicketDTO.class);
+            OcrTicketDTO ocrTicketDTO = objectMapper.readValue(response, OcrTicketDTO.class);
 
             // OCR로 받은 어웨이팀과 날짜를 기반으로 경기 결과 DB를 조회하여 알맞는 경기 정보를 불러
             GameResult gameResult = gameResultRepository
