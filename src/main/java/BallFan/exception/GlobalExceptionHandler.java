@@ -5,6 +5,7 @@ import BallFan.exception.auth.BlackListedTokenException;
 import BallFan.exception.auth.DifferentRefreshTokenException;
 import BallFan.exception.auth.DuplicatedSignUpException;
 import BallFan.exception.ticket.DuplicatedTicketException;
+import BallFan.exception.ticket.TicketNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,5 +42,12 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ErrorResponse.builder()
                 .message(e.getMessage())
                 .build(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(TicketNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleTicketNotFoundException(TicketNotFoundException e) {
+        return new ResponseEntity<>(ErrorResponse.builder()
+                .message(e.getMessage())
+                .build(), HttpStatus.NOT_FOUND);
     }
 }

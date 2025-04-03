@@ -2,12 +2,14 @@ package BallFan.service.ticket;
 
 import BallFan.authentication.UserDetailsServiceImpl;
 import BallFan.dto.ticket.OcrTicketDTO;
+import BallFan.dto.ticket.TicketPreviewDTO;
 import BallFan.entity.GameResult;
 import BallFan.entity.StadiumVisit;
 import BallFan.entity.Team;
 import BallFan.entity.Ticket;
 import BallFan.entity.user.User;
 import BallFan.exception.ticket.DuplicatedTicketException;
+import BallFan.exception.ticket.TicketNotFoundException;
 import BallFan.repository.GameResultRepository;
 import BallFan.repository.StadiumVisitRepository;
 import BallFan.repository.TicketRepository;
@@ -22,20 +24,43 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.IOException;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.format.TextStyle;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
 public class TicketService {
 
-    private static final String GAME_RESULT_NOT_FOUND = "경기 결과를 찾을 수 없습니다";
+    private static final String GAME_RESULT_NOT_FOUND_MESSAGE = "경기 결과를 찾을 수 없습니다";
     private static final String DUPLICATED_TICKET_MESSAGE = "이미 등록된 티켓입니다";
+    private static final String TICKET_NOT_FOUND_MESSAGE = "티켓이 존재하지 않습니다";
     private final UserDetailsServiceImpl userDetailsService;
     private final WebClient webClient;
     private final GameResultRepository gameResultRepository;
     private final TicketRepository ticketRepository;
     private final ObjectMapper objectMapper;
     private final StadiumVisitRepository stadiumVisitRepository;
+
+
+    /**
+     * 본인 티켓 조회하는 메서드
+     * @return List<TicketPreviewDTO>
+     */
+    public List<TicketPreviewDTO> getTicket() {
+        User user = userDetailsService.getUserByContextHolder();
+
+        List<Ticket> tickets = ticketRepository.findByUserId(user.getId());
+        if (tickets.isEmpty()) {
+            throw new TicketNotFoundException(TICKET_NOT_FOUND_MESSAGE);
+        }
+
+        List<TicketPreviewDTO> ticketPreviewDTOs = buildTicketPreviewDTO(tickets);
+        return ticketPreviewDTOs;
+    }
 
     /**
      * 종이 티켓 이미지를 받아, 종이티켓 OCR 서버로 넘겨주는 메서드
@@ -110,6 +135,28 @@ public class TicketService {
                 .build();
     }
 
+    private List<TicketPreviewDTO> buildTicketPreviewDTO(List<Ticket> tickets) {
+        List<TicketPreviewDTO> results = new ArrayList<>();
+
+        for (Ticket ticket : tickets) {
+            DayOfWeek dayOfWeek = ticket.getTicketDate().getDayOfWeek();
+            String koreanDay = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.KOREAN);
+
+            TicketPreviewDTO ticketPreviewDTO = TicketPreviewDTO.builder()
+                    .id(ticket.getId())
+                    .stadium(ticket.getGameResult().getStadium())
+                    .ticketDate(ticket.getTicketDate())
+                    .dayOfWeek(koreanDay)
+                    .homeTeam(ticket.getHomeTeam())
+                    .awayTeam(ticket.getAwayTeam())
+                    .build();
+
+            results.add(ticketPreviewDTO);
+        }
+
+        return results;
+    }
+
     private OcrTicketDTO requestPaperTicketOcr(MultipartFile file) {
         try {
             MultipartBodyBuilder builder = new MultipartBodyBuilder();
@@ -171,7 +218,7 @@ public class TicketService {
     private GameResult findGameResult(OcrTicketDTO dto) {
         return gameResultRepository
                 .findByAwayTeamAndGameDate(dto.getAwayTeam(), dto.getTicketDate())
-                .orElseThrow(() -> new IllegalArgumentException(GAME_RESULT_NOT_FOUND));
+                .orElseThrow(() -> new IllegalArgumentException(GAME_RESULT_NOT_FOUND_MESSAGE));
     }
 
     private Boolean determineIsWin(User user, GameResult gameResult) {
