@@ -7,6 +7,7 @@ import BallFan.entity.StadiumVisit;
 import BallFan.entity.Team;
 import BallFan.entity.Ticket;
 import BallFan.entity.user.User;
+import BallFan.exception.ticket.DuplicatedTicketException;
 import BallFan.repository.GameResultRepository;
 import BallFan.repository.StadiumVisitRepository;
 import BallFan.repository.TicketRepository;
@@ -28,6 +29,7 @@ import java.time.LocalDate;
 public class TicketService {
 
     private static final String GAME_RESULT_NOT_FOUND = "경기 결과를 찾을 수 없습니다";
+    private static final String DUPLICATED_TICKET_MESSAGE = "이미 등록된 티켓입니다";
     private final UserDetailsServiceImpl userDetailsService;
     private final WebClient webClient;
     private final GameResultRepository gameResultRepository;
@@ -69,6 +71,16 @@ public class TicketService {
             GameResult gameResult = gameResultRepository
                     .findByAwayTeamAndGameDate(ocrTicketDTO.getAwayTeam(), ocrTicketDTO.getTicketDate())
                     .orElseThrow(() -> new IllegalArgumentException(GAME_RESULT_NOT_FOUND));
+
+            // Ticket 중복 확인
+            if (ticketRepository.findByUserIdAndTicketDateAndHomeTeamAndAwayTeam(
+                    user.getId(),
+                    ocrTicketDTO.getTicketDate(),
+                    gameResult.getHomeTeam(),
+                    gameResult.getAwayTeam()
+            ).isPresent()) {
+                throw new DuplicatedTicketException(DUPLICATED_TICKET_MESSAGE);
+            }
 
             // 티켓을 등록할 때, 경기결과 스코어가 등록 되어있다면 내 팀을 기준으로 이겼는지 졌는지 true, false 넣어주기
             // 없다면 null 값으로 넣어주고, 무승부도 null
@@ -147,9 +159,18 @@ public class TicketService {
                     .findByAwayTeamAndGameDate(ocrTicketDTO.getAwayTeam(), ocrTicketDTO.getTicketDate())
                     .orElseThrow(() -> new IllegalArgumentException(GAME_RESULT_NOT_FOUND));
 
+            // Ticket 중복 확인
+            if (ticketRepository.findByUserIdAndTicketDateAndHomeTeamAndAwayTeam(
+                    user.getId(),
+                    ocrTicketDTO.getTicketDate(),
+                    gameResult.getHomeTeam(),
+                    gameResult.getAwayTeam()
+            ).isPresent()) {
+                throw new DuplicatedTicketException(DUPLICATED_TICKET_MESSAGE);
+            }
+
             // 티켓을 등록할 때, 경기결과 스코어가 등록 되어있다면 내 팀을 기준으로 이겼는지 졌는지 true, false 넣어주기
             // 없다면 null 값으로 넣어주고, 무승부도 null
-            // 만약 내 팀이 아닌 다른 경기를 봤을 때도 생각해야 함....(고민)
             Boolean isWin = null;
             if(gameResult.getScoreAwayTeam() != null && gameResult.getScoreHomeTeam() != null) {
                 Team winnerTeam = null;
