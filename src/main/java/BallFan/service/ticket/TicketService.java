@@ -99,7 +99,7 @@ public class TicketService {
             ticketRepository.save(ticket);
 
             // 경기장 방문 테이블 저장
-            StadiumVisit stadiumVisit = stadiumVisitRepository.findByUserIdAndStadium(user, gameResult.getStadium())
+            StadiumVisit stadiumVisit = stadiumVisitRepository.findByUserIdAndStadium(user.getId(), gameResult.getStadium())
                     .orElseGet(() -> stadiumVisitRepository.save(
                             StadiumVisit.builder()
                                     .user(user)
@@ -177,7 +177,7 @@ public class TicketService {
             ticketRepository.save(ticket);
 
             // 경기장 방문 테이블 저장
-            StadiumVisit stadiumVisit = stadiumVisitRepository.findByUserIdAndStadium(user, gameResult.getStadium())
+            StadiumVisit stadiumVisit = stadiumVisitRepository.findByUserIdAndStadium(user.getId(), gameResult.getStadium())
                     .orElseGet(() -> stadiumVisitRepository.save(
                             StadiumVisit.builder()
                                     .user(user)
