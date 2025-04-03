@@ -44,175 +44,56 @@ public class TicketService {
     public void registerPaperTicket(MultipartFile file) {
         User user = userDetailsService.getUserByContextHolder();
 
-        try {
-            MultipartBodyBuilder builder = new MultipartBodyBuilder();
-
-            builder.part("file", new ByteArrayResource(file.getBytes()) {
-                @Override
-                public String getFilename() {
-                    return "dummy.png"; // 꼭 넣어야 함
-                }
-            }).contentType(MediaType.APPLICATION_OCTET_STREAM);
-
-            // 비동기 -> 동기 방식으로 전환하여 response에 Json 담기
-            String response = webClient.post()
-                    .uri("/upload_paperTicket")
-                    .contentType(MediaType.MULTIPART_FORM_DATA)
-                    .body(BodyInserters.fromMultipartData(builder.build()))
-                    .retrieve()
-                    .bodyToMono(String.class)
-                    .block();
-
-            // Json -> 객체로 역직렬화
-            // annotation JsonProperty 설정해야 같은 이름으로 판정되어 인식함
-            OcrTicketDTO ocrTicketDTO = objectMapper.readValue(response, OcrTicketDTO.class);
-
-            // OCR로 받은 어웨이팀과 날짜를 기반으로 경기 결과 DB를 조회하여 알맞는 경기 정보를 불러
-            GameResult gameResult = gameResultRepository
-                    .findByAwayTeamAndGameDate(ocrTicketDTO.getAwayTeam(), ocrTicketDTO.getTicketDate())
-                    .orElseThrow(() -> new IllegalArgumentException(GAME_RESULT_NOT_FOUND));
-
-            // Ticket 중복 확인
-            if (ticketRepository.findByUserIdAndTicketDateAndHomeTeamAndAwayTeam(
-                    user.getId(),
-                    ocrTicketDTO.getTicketDate(),
-                    gameResult.getHomeTeam(),
-                    gameResult.getAwayTeam()
-            ).isPresent()) {
-                throw new DuplicatedTicketException(DUPLICATED_TICKET_MESSAGE);
-            }
-
-            // 티켓을 등록할 때, 경기결과 스코어가 등록 되어있다면 내 팀을 기준으로 이겼는지 졌는지 true, false 넣어주기
-            // 없다면 null 값으로 넣어주고, 무승부도 null
-            Boolean isWin = null;
-            if (gameResult.getScoreAwayTeam() != null && gameResult.getScoreHomeTeam() != null) {
-                Team winnerTeam = null;
-
-                if (gameResult.getScoreHomeTeam() > gameResult.getScoreAwayTeam()) {
-                    winnerTeam = gameResult.getHomeTeam();
-                } else if (gameResult.getScoreHomeTeam() < gameResult.getScoreAwayTeam()) {
-                    winnerTeam = gameResult.getAwayTeam();
-                }
-
-                // 유저 팀이 경기 참여팀인지 확인
-                boolean isUserTeamInvolved =
-                        user.getTeam().equals(gameResult.getHomeTeam()) || user.getTeam().equals(gameResult.getAwayTeam());
-
-                if (winnerTeam != null && isUserTeamInvolved) {
-                    isWin = winnerTeam.equals(user.getTeam());
-                } else {
-                    // 유저 팀이 관련 없는 경기거나 무승부이면 isWin == null 유지
-                    isWin = null;
-                }
-            }
-
-            // Ticket 저장
-            Ticket ticket = buildTicket(gameResult, ocrTicketDTO, isWin, user);
-            ticketRepository.save(ticket);
-
-            // 경기장 방문 테이블 저장
-            StadiumVisit stadiumVisit = stadiumVisitRepository.findByUserIdAndStadium(user.getId(), gameResult.getStadium())
-                    .orElseGet(() -> stadiumVisitRepository.save(
-                            StadiumVisit.builder()
-                                    .user(user)
-                                    .visitCount(1)
-                                    .stadium(gameResult.getStadium())
-                                    .build()
-                    ));
-
-            // 이미 경기장 방문 기록이 있다면, 방문 횟수만 증가
-            stadiumVisit.increaseVisitCount();
-
-
-        } catch (IOException e) {
-            throw new RuntimeException("이미지 전송 실패", e);
-        }
+        // 종이티켓 OCR 등록
+        OcrTicketDTO ocrTicketDTO = requestPaperTicketOcr(file);
+        // 경기 결과 조회
+        GameResult gameResult = findGameResult(ocrTicketDTO);
+        // 경기 결과 중복 확인
+        validateDuplicateTicket(user, gameResult, ocrTicketDTO);
+        // 내가 응원하는 팀 승리 여부 판단
+        Boolean isWin = determineIsWin(user, gameResult);
+        // 티켓 저장
+        Ticket ticket = buildTicket(gameResult, ocrTicketDTO, isWin, user);
+        ticketRepository.save(ticket);
+        // 경기장 방문 테이블 저장
+        StadiumVisit stadiumVisit = stadiumVisitRepository.findByUserIdAndStadium(user.getId(), gameResult.getStadium())
+                .orElseGet(() -> stadiumVisitRepository.save(
+                        StadiumVisit.builder()
+                                .user(user)
+                                .visitCount(1)
+                                .stadium(gameResult.getStadium())
+                                .build()
+                ));
+        // 이미 경기장 방문 기록이 있다면, 방문 횟수만 증가
+        stadiumVisit.increaseVisitCount();
     }
 
     public void registerPhoneTicket(MultipartFile file) {
         User user = userDetailsService.getUserByContextHolder();
 
-        try {
-            MultipartBodyBuilder builder = new MultipartBodyBuilder();
+        // 스마트티켓 OCR 등록
+        OcrTicketDTO ocrTicketDTO = requestPhoneTicketOcr(file);
+        // 경기 결과 조회
+        GameResult gameResult = findGameResult(ocrTicketDTO);
+        // 경기 결과 중복 확인
+        validateDuplicateTicket(user, gameResult, ocrTicketDTO);
+        // 내가 응원하는 팀 승리 여부 판단
+        Boolean isWin = determineIsWin(user, gameResult);
+        // 티켓 저장
+        Ticket ticket = buildTicket(gameResult, ocrTicketDTO, isWin, user);
+        ticketRepository.save(ticket);
+        // 경기장 방문 테이블 저장
+        StadiumVisit stadiumVisit = stadiumVisitRepository.findByUserIdAndStadium(user.getId(), gameResult.getStadium())
+                .orElseGet(() -> stadiumVisitRepository.save(
+                        StadiumVisit.builder()
+                                .user(user)
+                                .visitCount(1)
+                                .stadium(gameResult.getStadium())
+                                .build()
+                ));
+        // 이미 경기장 방문 기록이 있다면, 방문 횟수만 증가
+        stadiumVisit.increaseVisitCount();
 
-            builder.part("file", new ByteArrayResource(file.getBytes()) {
-                @Override
-                public String getFilename() {
-                    return "dummy.png"; // 꼭 넣어야 함
-                }
-            }).contentType(MediaType.APPLICATION_OCTET_STREAM);
-
-            // 비동기 -> 동기 방식으로 전환하여 response에 Json 담기
-            String response = webClient.post()
-                    .uri("/upload_phoneTicket")
-                    .contentType(MediaType.MULTIPART_FORM_DATA)
-                    .body(BodyInserters.fromMultipartData(builder.build()))
-                    .retrieve()
-                    .bodyToMono(String.class)
-                    .block();
-
-            // Json -> 객체로 역직렬화
-            OcrTicketDTO ocrTicketDTO = objectMapper.readValue(response, OcrTicketDTO.class);
-
-            // OCR로 받은 어웨이팀과 날짜를 기반으로 경기 결과 DB를 조회하여 알맞는 경기 정보를 불러
-            GameResult gameResult = gameResultRepository
-                    .findByAwayTeamAndGameDate(ocrTicketDTO.getAwayTeam(), ocrTicketDTO.getTicketDate())
-                    .orElseThrow(() -> new IllegalArgumentException(GAME_RESULT_NOT_FOUND));
-
-            // Ticket 중복 확인
-            if (ticketRepository.findByUserIdAndTicketDateAndHomeTeamAndAwayTeam(
-                    user.getId(),
-                    ocrTicketDTO.getTicketDate(),
-                    gameResult.getHomeTeam(),
-                    gameResult.getAwayTeam()
-            ).isPresent()) {
-                throw new DuplicatedTicketException(DUPLICATED_TICKET_MESSAGE);
-            }
-
-            // 티켓을 등록할 때, 경기결과 스코어가 등록 되어있다면 내 팀을 기준으로 이겼는지 졌는지 true, false 넣어주기
-            // 없다면 null 값으로 넣어주고, 무승부도 null
-            Boolean isWin = null;
-            if(gameResult.getScoreAwayTeam() != null && gameResult.getScoreHomeTeam() != null) {
-                Team winnerTeam = null;
-
-                if (gameResult.getScoreHomeTeam() > gameResult.getScoreAwayTeam()) {
-                    winnerTeam = gameResult.getHomeTeam();
-                } else if (gameResult.getScoreHomeTeam() < gameResult.getScoreAwayTeam()) {
-                    winnerTeam = gameResult.getAwayTeam();
-                }
-
-                // 유저 팀이 경기 참여팀인지 확인
-                boolean isUserTeamInvolved =
-                        user.getTeam().equals(gameResult.getHomeTeam()) || user.getTeam().equals(gameResult.getAwayTeam());
-
-                if (winnerTeam != null && isUserTeamInvolved) {
-                    isWin = winnerTeam.equals(user.getTeam());
-                } else {
-                    // 유저 팀이 관련 없는 경기거나 무승부이면 isWin == null 유지
-                    isWin = null;
-                }
-            }
-
-            // Ticket 저장
-            Ticket ticket = buildTicket(gameResult, ocrTicketDTO, isWin, user);
-            ticketRepository.save(ticket);
-
-            // 경기장 방문 테이블 저장
-            StadiumVisit stadiumVisit = stadiumVisitRepository.findByUserIdAndStadium(user.getId(), gameResult.getStadium())
-                    .orElseGet(() -> stadiumVisitRepository.save(
-                            StadiumVisit.builder()
-                                    .user(user)
-                                    .visitCount(1)
-                                    .stadium(gameResult.getStadium())
-                                    .build()
-                    ));
-
-            // 이미 경기장 방문 기록이 있다면, 방문 횟수만 증가
-            stadiumVisit.increaseVisitCount();
-
-        } catch (IOException e) {
-            throw new RuntimeException("이미지 전송 실패", e);
-        }
     }
 
     private Ticket buildTicket(GameResult gameResult, OcrTicketDTO ocrTicketDTO, Boolean isWin, User user) {
@@ -227,5 +108,98 @@ public class TicketService {
                 .gameResult(gameResult)
                 .user(user)
                 .build();
+    }
+
+    private OcrTicketDTO requestPaperTicketOcr(MultipartFile file) {
+        try {
+            MultipartBodyBuilder builder = new MultipartBodyBuilder();
+
+            builder.part("file", new ByteArrayResource(file.getBytes()) {
+                @Override
+                public String getFilename() {
+                    return "dummy.png";
+                }
+            }).contentType(MediaType.APPLICATION_OCTET_STREAM);
+
+            // 비동기 -> 동기 방식으로 전환하여 response에 Json 담기
+            String response = webClient.post()
+                    .uri("/upload_paperTicket")
+                    .contentType(MediaType.MULTIPART_FORM_DATA)
+                    .body(BodyInserters.fromMultipartData(builder.build()))
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+
+            // Json -> 객체로 역직렬화
+            // annotation JsonProperty 설정해야 같은 이름으로 판정되어 인식함
+            return objectMapper.readValue(response, OcrTicketDTO.class);
+
+        } catch (IOException e) {
+            throw new RuntimeException("이미지 전송 실패", e);
+        }
+    }
+
+    private OcrTicketDTO requestPhoneTicketOcr(MultipartFile file) {
+        try {
+            MultipartBodyBuilder builder = new MultipartBodyBuilder();
+
+            builder.part("file", new ByteArrayResource(file.getBytes()) {
+                @Override
+                public String getFilename() {
+                    return "dummy.png";
+                }
+            }).contentType(MediaType.APPLICATION_OCTET_STREAM);
+
+            // 비동기 -> 동기 방식으로 전환하여 response에 Json 담기
+            String response = webClient.post()
+                    .uri("/upload_phoneTicket")
+                    .contentType(MediaType.MULTIPART_FORM_DATA)
+                    .body(BodyInserters.fromMultipartData(builder.build()))
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+
+            // Json -> 객체로 역직렬화
+            // annotation JsonProperty 설정해야 같은 이름으로 판정되어 인식함
+            return objectMapper.readValue(response, OcrTicketDTO.class);
+
+        } catch (IOException e) {
+            throw new RuntimeException("이미지 전송 실패", e);
+        }
+    }
+
+    private GameResult findGameResult(OcrTicketDTO dto) {
+        return gameResultRepository
+                .findByAwayTeamAndGameDate(dto.getAwayTeam(), dto.getTicketDate())
+                .orElseThrow(() -> new IllegalArgumentException(GAME_RESULT_NOT_FOUND));
+    }
+
+    private Boolean determineIsWin(User user, GameResult gameResult) {
+        if (gameResult.getScoreAwayTeam() == null || gameResult.getScoreHomeTeam() == null) return null;
+
+        Team winnerTeam = null;
+
+        if (gameResult.getScoreHomeTeam() > gameResult.getScoreAwayTeam()) {
+            winnerTeam = gameResult.getHomeTeam();
+        } else if (gameResult.getScoreHomeTeam() < gameResult.getScoreAwayTeam()) {
+            winnerTeam = gameResult.getAwayTeam();
+        }
+
+        boolean isUserTeamInvolved =
+                user.getTeam().equals(gameResult.getHomeTeam()) || user.getTeam().equals(gameResult.getAwayTeam());
+
+        return (winnerTeam != null && isUserTeamInvolved)
+                ? winnerTeam.equals(user.getTeam())
+                : null;
+    }
+
+    private void validateDuplicateTicket(User user, GameResult gameResult, OcrTicketDTO dto) {
+        boolean exists = ticketRepository.findByUserIdAndTicketDateAndHomeTeamAndAwayTeam(
+                user.getId(), dto.getTicketDate(), gameResult.getHomeTeam(), gameResult.getAwayTeam()
+        ).isPresent();
+
+        if (exists) {
+            throw new DuplicatedTicketException(DUPLICATED_TICKET_MESSAGE);
+        }
     }
 }
