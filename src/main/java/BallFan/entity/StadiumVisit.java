@@ -29,4 +29,8 @@ public class StadiumVisit {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    public void increaseVisitCount() {
+        this.visitCount++;
+    }
 }

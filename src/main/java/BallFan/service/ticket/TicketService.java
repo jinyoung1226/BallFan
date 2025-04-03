@@ -3,10 +3,12 @@ package BallFan.service.ticket;
 import BallFan.authentication.UserDetailsServiceImpl;
 import BallFan.dto.ticket.OcrTicketDTO;
 import BallFan.entity.GameResult;
+import BallFan.entity.StadiumVisit;
 import BallFan.entity.Team;
 import BallFan.entity.Ticket;
 import BallFan.entity.user.User;
 import BallFan.repository.GameResultRepository;
+import BallFan.repository.StadiumVisitRepository;
 import BallFan.repository.TicketRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,7 @@ public class TicketService {
     private final GameResultRepository gameResultRepository;
     private final TicketRepository ticketRepository;
     private final ObjectMapper objectMapper;
+    private final StadiumVisitRepository stadiumVisitRepository;
 
     /**
      * 종이 티켓 이미지를 받아, 종이티켓 OCR 서버로 넘겨주는 메서드
@@ -95,6 +98,20 @@ public class TicketService {
             Ticket ticket = buildTicket(gameResult, ocrTicketDTO, isWin, user);
             ticketRepository.save(ticket);
 
+            // 경기장 방문 테이블 저장
+            StadiumVisit stadiumVisit = stadiumVisitRepository.findByUserIdAndStadium(user, gameResult.getStadium())
+                    .orElseGet(() -> stadiumVisitRepository.save(
+                            StadiumVisit.builder()
+                                    .user(user)
+                                    .visitCount(1)
+                                    .stadium(gameResult.getStadium())
+                                    .build()
+                    ));
+
+            // 이미 경기장 방문 기록이 있다면, 방문 횟수만 증가
+            stadiumVisit.increaseVisitCount();
+
+
         } catch (IOException e) {
             throw new RuntimeException("이미지 전송 실패", e);
         }
@@ -158,6 +175,19 @@ public class TicketService {
             // Ticket 저장
             Ticket ticket = buildTicket(gameResult, ocrTicketDTO, isWin, user);
             ticketRepository.save(ticket);
+
+            // 경기장 방문 테이블 저장
+            StadiumVisit stadiumVisit = stadiumVisitRepository.findByUserIdAndStadium(user, gameResult.getStadium())
+                    .orElseGet(() -> stadiumVisitRepository.save(
+                            StadiumVisit.builder()
+                                    .user(user)
+                                    .visitCount(1)
+                                    .stadium(gameResult.getStadium())
+                                    .build()
+                    ));
+
+            // 이미 경기장 방문 기록이 있다면, 방문 횟수만 증가
+            stadiumVisit.increaseVisitCount();
 
         } catch (IOException e) {
             throw new RuntimeException("이미지 전송 실패", e);
