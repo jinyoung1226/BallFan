@@ -70,18 +70,24 @@ public class TicketService {
             // 티켓을 등록할 때, 경기결과 스코어가 등록 되어있다면 내 팀을 기준으로 이겼는지 졌는지 true, false 넣어주기
             // 없다면 null 값으로 넣어주고, 무승부도 null
             Boolean isWin = null;
-            if(gameResult.getScoreAwayTeam() != null && gameResult.getScoreHomeTeam() != null) {
+            if (gameResult.getScoreAwayTeam() != null && gameResult.getScoreHomeTeam() != null) {
                 Team winnerTeam = null;
 
-                if(gameResult.getScoreHomeTeam() > gameResult.getScoreAwayTeam()) {
+                if (gameResult.getScoreHomeTeam() > gameResult.getScoreAwayTeam()) {
                     winnerTeam = gameResult.getHomeTeam();
-                } else if(gameResult.getScoreHomeTeam() < gameResult.getScoreAwayTeam()) {
+                } else if (gameResult.getScoreHomeTeam() < gameResult.getScoreAwayTeam()) {
                     winnerTeam = gameResult.getAwayTeam();
                 }
 
-                // 무승부면 winnerTeam이 null이므로, isWin == null로 유지
-                if(winnerTeam != null) {
+                // 유저 팀이 경기 참여팀인지 확인
+                boolean isUserTeamInvolved =
+                        user.getTeam().equals(gameResult.getHomeTeam()) || user.getTeam().equals(gameResult.getAwayTeam());
+
+                if (winnerTeam != null && isUserTeamInvolved) {
                     isWin = winnerTeam.equals(user.getTeam());
+                } else {
+                    // 유저 팀이 관련 없는 경기거나 무승부이면 isWin == null 유지
+                    isWin = null;
                 }
             }
 
@@ -96,8 +102,6 @@ public class TicketService {
 
     public void registerPhoneTicket(MultipartFile file) {
         User user = userDetailsService.getUserByContextHolder();
-
-        ObjectMapper mapper = new ObjectMapper();
 
         try {
             MultipartBodyBuilder builder = new MultipartBodyBuilder();
@@ -128,19 +132,26 @@ public class TicketService {
 
             // 티켓을 등록할 때, 경기결과 스코어가 등록 되어있다면 내 팀을 기준으로 이겼는지 졌는지 true, false 넣어주기
             // 없다면 null 값으로 넣어주고, 무승부도 null
+            // 만약 내 팀이 아닌 다른 경기를 봤을 때도 생각해야 함....(고민)
             Boolean isWin = null;
             if(gameResult.getScoreAwayTeam() != null && gameResult.getScoreHomeTeam() != null) {
                 Team winnerTeam = null;
 
-                if(gameResult.getScoreHomeTeam() > gameResult.getScoreAwayTeam()) {
+                if (gameResult.getScoreHomeTeam() > gameResult.getScoreAwayTeam()) {
                     winnerTeam = gameResult.getHomeTeam();
-                } else if(gameResult.getScoreHomeTeam() < gameResult.getScoreAwayTeam()) {
+                } else if (gameResult.getScoreHomeTeam() < gameResult.getScoreAwayTeam()) {
                     winnerTeam = gameResult.getAwayTeam();
                 }
 
-                // 무승부면 winnerTeam이 null이므로, isWin == null로 유지
-                if(winnerTeam != null) {
+                // 유저 팀이 경기 참여팀인지 확인
+                boolean isUserTeamInvolved =
+                        user.getTeam().equals(gameResult.getHomeTeam()) || user.getTeam().equals(gameResult.getAwayTeam());
+
+                if (winnerTeam != null && isUserTeamInvolved) {
                     isWin = winnerTeam.equals(user.getTeam());
+                } else {
+                    // 유저 팀이 관련 없는 경기거나 무승부이면 isWin == null 유지
+                    isWin = null;
                 }
             }
 
