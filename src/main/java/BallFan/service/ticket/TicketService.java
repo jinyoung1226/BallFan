@@ -14,8 +14,11 @@ import BallFan.exception.ticket.TicketNotFoundException;
 import BallFan.repository.GameResultRepository;
 import BallFan.repository.StadiumVisitRepository;
 import BallFan.repository.TicketRepository;
+import BallFan.s3.S3Uploader;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
@@ -37,6 +40,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class TicketService {
 
+    @Value("${cloud.aws.s3.bucket}")
+    private String DirName;
     private static final String GAME_RESULT_NOT_FOUND_MESSAGE = "경기 결과를 찾을 수 없습니다";
     private static final String DUPLICATED_TICKET_MESSAGE = "이미 등록된 티켓입니다";
     private static final String TICKET_NOT_FOUND_MESSAGE = "티켓이 존재하지 않습니다";
@@ -58,6 +63,7 @@ public class TicketService {
     private final TicketRepository ticketRepository;
     private final ObjectMapper objectMapper;
     private final StadiumVisitRepository stadiumVisitRepository;
+    private final S3Uploader s3Uploader;
 
     /**
      * 티켓 조회하는 메서드
@@ -150,6 +156,27 @@ public class TicketService {
         // 이미 경기장 방문 기록이 있다면, 방문 횟수만 증가
         stadiumVisit.increaseVisitCount();
 
+    }
+
+    /**
+     * 티켓 이미지 등록하는 메서드
+     * @param ticketId
+     * @param imageFile
+     */
+    @Transactional
+    public void registerTicketImage(Long ticketId, MultipartFile imageFile) {
+        User user = userDetailsService.getUserByContextHolder();
+
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new TicketNotFoundException(TICKET_NOT_FOUND_MESSAGE));
+
+        String imagePath = null;
+        if (imageFile != null && !imageFile.isEmpty()) {
+            imagePath = s3Uploader.uploadImage(imageFile, DirName);
+            ticket.updateImage(imagePath);
+        } else {
+            user.updateImage(null);
+        }
     }
 
     private DetailTicketDTO buildDetailTicketDTO(Ticket ticket) {

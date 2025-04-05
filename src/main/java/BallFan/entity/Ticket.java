@@ -42,6 +42,9 @@ public class Ticket {
     @Column(name = "has_review")
     private boolean hasReview;
 
+    @Column(name = "image")
+    private String image;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -49,4 +52,9 @@ public class Ticket {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "game_result_id")
     private GameResult gameResult;
+
+
+    public void updateImage(String image) {
+        this.image = image;
+    }
 }

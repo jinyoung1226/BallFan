@@ -41,4 +41,9 @@ public class TicketController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/image/{id}")
+    public ResponseEntity<Void> registerTicketImage(@PathVariable Long id, @RequestPart MultipartFile file) {
+        ticketService.registerTicketImage(id, file);
+    }
+
 }
