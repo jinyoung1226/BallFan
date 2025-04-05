@@ -1,5 +1,6 @@
 package BallFan.controller;
 
+import BallFan.dto.ticket.DetailTicketDTO;
 import BallFan.dto.ticket.TicketPreviewDTO;
 import BallFan.service.ticket.TicketService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,12 @@ public class TicketController {
     public ResponseEntity<List<TicketPreviewDTO>> getTicket() {
         List<TicketPreviewDTO> tickets = ticketService.getTicket();
         return ResponseEntity.ok(tickets);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<DetailTicketDTO> getTicketDetail(@PathVariable Long id) {
+        DetailTicketDTO ticketDetail = ticketService.getTicketDetail(id);
+        return ResponseEntity.ok(ticketDetail);
     }
 
     @PostMapping("/paper")

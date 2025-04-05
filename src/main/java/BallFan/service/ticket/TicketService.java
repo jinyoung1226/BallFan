@@ -1,12 +1,13 @@
 package BallFan.service.ticket;
 
 import BallFan.authentication.UserDetailsServiceImpl;
+import BallFan.dto.line_up.LineUpDTO;
+import BallFan.dto.pitcher.PitcherDTO;
+import BallFan.dto.ticket.DetailTicketDTO;
 import BallFan.dto.ticket.OcrTicketDTO;
 import BallFan.dto.ticket.TicketPreviewDTO;
-import BallFan.entity.GameResult;
-import BallFan.entity.StadiumVisit;
-import BallFan.entity.Team;
-import BallFan.entity.Ticket;
+import BallFan.entity.*;
+import BallFan.entity.pitcher.PitcherStat;
 import BallFan.entity.user.User;
 import BallFan.exception.ticket.DuplicatedTicketException;
 import BallFan.exception.ticket.TicketNotFoundException;
@@ -45,9 +46,8 @@ public class TicketService {
     private final ObjectMapper objectMapper;
     private final StadiumVisitRepository stadiumVisitRepository;
 
-
     /**
-     * 본인 티켓 조회하는 메서드
+     * 티켓 조회하는 메서드
      * @return List<TicketPreviewDTO>
      */
     public List<TicketPreviewDTO> getTicket() {
@@ -60,6 +60,20 @@ public class TicketService {
 
         List<TicketPreviewDTO> ticketPreviewDTOs = buildTicketPreviewDTO(tickets);
         return ticketPreviewDTOs;
+    }
+
+    /**
+     * 티켓 상세정보 조회하는 메서드
+     * @param ticketId
+     * @return
+     */
+    public DetailTicketDTO getTicketDetail(Long ticketId) {
+        User user = userDetailsService.getUserByContextHolder();
+
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new TicketNotFoundException(TICKET_NOT_FOUND_MESSAGE));
+
+        return buildDetailTicketDTO(ticket);
     }
 
     /**
@@ -93,6 +107,10 @@ public class TicketService {
         stadiumVisit.increaseVisitCount();
     }
 
+    /**
+     * 스마트 티켓 이미지를 받아, 스마트 티켓 OCR 서버로 넘겨주는 메서드
+     * @param file
+     */
     public void registerPhoneTicket(MultipartFile file) {
         User user = userDetailsService.getUserByContextHolder();
 
@@ -121,6 +139,45 @@ public class TicketService {
 
     }
 
+    private DetailTicketDTO buildDetailTicketDTO(Ticket ticket) {
+        List<PitcherDTO> pitcherDTOs = mapToPitcherDTOs(ticket);
+        List<LineUpDTO> lineUpDTOs = mapToLineUpDTOs(ticket);
+
+        DayOfWeek dayOfWeek = ticket.getGameResult().getGameDate().getDayOfWeek();
+        String koreanDay = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.KOREAN);
+
+        return DetailTicketDTO.builder()
+                .stadium(ticket.getGameResult().getStadium())
+                .gameDate(ticket.getGameResult().getGameDate())
+                .dayOfWeek(koreanDay)
+                .homeTeam(ticket.getGameResult().getHomeTeam().toString())
+                .awayTeam(ticket.getGameResult().getAwayTeam().toString())
+                .scoreHomeTeam(ticket.getGameResult().getScoreHomeTeam())
+                .scoreAwayTeam(ticket.getGameResult().getScoreAwayTeam())
+                .pitchers(pitcherDTOs)
+                .lineUps(lineUpDTOs)
+                .seat(ticket.getSeat())
+                .isWin(ticket.getIsWin())
+                .hasReview(ticket.isHasReview())
+                .build();
+    }
+
+    private List<PitcherDTO> mapToPitcherDTOs(Ticket ticket) {
+        List<PitcherDTO> pitcherDTOs = new ArrayList<>();
+        for (PitcherStat pitcher : ticket.getGameResult().getPitcherStats()) {
+            pitcherDTOs.add(new PitcherDTO(pitcher.getName(), pitcher.getTeam(), pitcher.getPitcherType()));
+        }
+        return pitcherDTOs;
+    }
+
+    private List<LineUpDTO> mapToLineUpDTOs(Ticket ticket) {
+        List<LineUpDTO> lineUpDTOs = new ArrayList<>();
+        for (LineUp lineUp : ticket.getGameResult().getLineUps()) {
+            lineUpDTOs.add(new LineUpDTO(lineUp.getName(), lineUp.getOrder(), lineUp.getPosition(), lineUp.getTeam()));
+        }
+        return lineUpDTOs;
+    }
+
     private Ticket buildTicket(GameResult gameResult, OcrTicketDTO ocrTicketDTO, Boolean isWin, User user) {
         return Ticket.builder()
                 .homeTeam(gameResult.getHomeTeam())
@@ -147,8 +204,8 @@ public class TicketService {
                     .stadium(ticket.getGameResult().getStadium())
                     .ticketDate(ticket.getTicketDate())
                     .dayOfWeek(koreanDay)
-                    .homeTeam(ticket.getHomeTeam())
-                    .awayTeam(ticket.getAwayTeam())
+                    .homeTeam(ticket.getHomeTeam().toString())
+                    .awayTeam(ticket.getAwayTeam().toString())
                     .build();
 
             results.add(ticketPreviewDTO);

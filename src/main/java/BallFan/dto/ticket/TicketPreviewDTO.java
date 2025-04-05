@@ -18,7 +18,7 @@ public class TicketPreviewDTO {
     private String stadium;
     private LocalDate ticketDate;
     private String dayOfWeek;
-    private Team homeTeam;
-    private Team awayTeam;
+    private String homeTeam;
+    private String awayTeam;
 
 }
