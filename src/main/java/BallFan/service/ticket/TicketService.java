@@ -31,6 +31,7 @@ import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +40,18 @@ public class TicketService {
     private static final String GAME_RESULT_NOT_FOUND_MESSAGE = "경기 결과를 찾을 수 없습니다";
     private static final String DUPLICATED_TICKET_MESSAGE = "이미 등록된 티켓입니다";
     private static final String TICKET_NOT_FOUND_MESSAGE = "티켓이 존재하지 않습니다";
+    private static final Map<String,String> POSITION_TRANSLATION = Map.ofEntries(
+            Map.entry("투수", "P"),
+            Map.entry("포수", "C"),
+            Map.entry("1루수", "1B"),
+            Map.entry("2루수", "2B"),
+            Map.entry("3루수", "3B"),
+            Map.entry("유격수", "SS"),
+            Map.entry("좌익수", "LF"),
+            Map.entry("중견수", "CF"),
+            Map.entry("우익수", "RF"),
+            Map.entry("지명타자", "DH")
+    );
     private final UserDetailsServiceImpl userDetailsService;
     private final WebClient webClient;
     private final GameResultRepository gameResultRepository;
@@ -173,7 +186,10 @@ public class TicketService {
     private List<LineUpDTO> mapToLineUpDTOs(Ticket ticket) {
         List<LineUpDTO> lineUpDTOs = new ArrayList<>();
         for (LineUp lineUp : ticket.getGameResult().getLineUps()) {
-            lineUpDTOs.add(new LineUpDTO(lineUp.getName(), lineUp.getOrder(), lineUp.getPosition(), lineUp.getTeam()));
+            String koreanPosition = lineUp.getPosition();
+            String englishPosition = POSITION_TRANSLATION.getOrDefault(koreanPosition, koreanPosition); // 매핑 안 되어 있으면 원래 값
+
+            lineUpDTOs.add(new LineUpDTO(lineUp.getName(), lineUp.getOrder(), englishPosition, lineUp.getTeam()));
         }
         return lineUpDTOs;
     }
