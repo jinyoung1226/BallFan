@@ -5,7 +5,7 @@ public enum Team {
     LG("LG 트윈스"),
     SSG("SSG 랜더스"),
     KIA("KIA 타이거즈"),
-    KT("KT wiz"),
+    KT("kt wiz"),
     한화("한화 이글스"),
     NC("NC 다이노스"),
     두산("두산 베어스"),
