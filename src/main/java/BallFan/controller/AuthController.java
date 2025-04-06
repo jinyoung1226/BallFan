@@ -1,6 +1,6 @@
 package BallFan.controller;
 
-import BallFan.dto.Response.BaseResponse;
+import BallFan.dto.response.BaseResponse;
 import BallFan.dto.auth.SignInDTO;
 import BallFan.dto.auth.SignInRequest;
 import BallFan.dto.auth.SignUpRequest;
