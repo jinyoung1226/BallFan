@@ -1,4 +1,4 @@
-package BallFan.dto.Response;
+package BallFan.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;

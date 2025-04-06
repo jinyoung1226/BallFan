@@ -1,4 +1,4 @@
-package BallFan.dto.Response;
+package BallFan.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;
