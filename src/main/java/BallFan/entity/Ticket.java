@@ -37,7 +37,7 @@ public class Ticket {
     private LocalDate createdDate;
 
     @Column(name = "is_win", nullable = true)
-    private Boolean isWin;
+    private String isWin;
 
     @Column(name = "has_review")
     private boolean hasReview;
@@ -56,5 +56,9 @@ public class Ticket {
 
     public void updateImage(String image) {
         this.image = image;
+    }
+
+    public void updateIsWin(String isWin) {
+        this.isWin = isWin;
     }
 }

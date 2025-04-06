@@ -26,6 +26,6 @@ public class DetailTicketDTO {
     private List<PitcherDTO> pitchers;
     private List<LineUpDTO> lineUps;
     private String seat;
-    private Boolean isWin;
+    private String isWin;
     private Boolean hasReview;
 }

@@ -1,7 +1,7 @@
 package BallFan.controller;
 
 import BallFan.authentication.UserDetailsServiceImpl;
-import BallFan.dto.Response.BaseResponse;
+import BallFan.dto.response.BaseResponse;
 import BallFan.dto.auth.SignInDTO;
 import BallFan.entity.user.User;
 import BallFan.repository.TokenRepository;

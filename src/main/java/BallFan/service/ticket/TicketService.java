@@ -4,12 +4,14 @@ import BallFan.authentication.UserDetailsServiceImpl;
 import BallFan.dto.line_up.LineUpDTO;
 import BallFan.dto.pitcher.PitcherDTO;
 import BallFan.dto.ticket.DetailTicketDTO;
+import BallFan.dto.ticket.HomeResponseDTO;
 import BallFan.dto.ticket.OcrTicketDTO;
 import BallFan.dto.ticket.TicketPreviewDTO;
 import BallFan.entity.*;
 import BallFan.entity.pitcher.PitcherStat;
 import BallFan.entity.user.User;
 import BallFan.exception.ticket.DuplicatedTicketException;
+import BallFan.exception.ticket.TicketDetailNotFoundException;
 import BallFan.exception.ticket.TicketNotFoundException;
 import BallFan.repository.GameResultRepository;
 import BallFan.repository.StadiumVisitRepository;
@@ -45,6 +47,7 @@ public class TicketService {
     private static final String GAME_RESULT_NOT_FOUND_MESSAGE = "경기 결과를 찾을 수 없습니다";
     private static final String DUPLICATED_TICKET_MESSAGE = "이미 등록된 티켓입니다";
     private static final String TICKET_NOT_FOUND_MESSAGE = "티켓이 존재하지 않습니다";
+    private static final String TICKET_DETAIL_NOT_FOUND_MESSAGE = "티켓이 상세정보가 존재하지 않습니다";
     private static final Map<String,String> POSITION_TRANSLATION = Map.ofEntries(
             Map.entry("투수", "P"),
             Map.entry("포수", "C"),
@@ -66,19 +69,40 @@ public class TicketService {
     private final S3Uploader s3Uploader;
 
     /**
-     * 티켓 조회하는 메서드
+     * 티켓 조회하고 내부적으로 연승 계산하는 메서드
      * @return List<TicketPreviewDTO>
      */
-    public List<TicketPreviewDTO> getTicket() {
+    @Transactional
+    public HomeResponseDTO getTicket() {
         User user = userDetailsService.getUserByContextHolder();
 
         List<Ticket> tickets = ticketRepository.findByUserId(user.getId());
+
+        // 티켓이 없는 경우: 연승(null) + 빈 리스트 또는 비어 있는 DTO 리스트 반환
         if (tickets.isEmpty()) {
-            throw new TicketNotFoundException(TICKET_NOT_FOUND_MESSAGE);
+            return new HomeResponseDTO(null, buildTicketPreviewDTO(tickets));
         }
 
+        // 여기부터 조회할 때마다 연승 계산을 최신활를 반영하여 계산하기 위한 로직
+        // 1. isWin == null && 내가 응원하는 팀이 경기한 티켓만 필터링
+        List<Ticket> needToEvaluate = tickets.stream()
+                .filter(ticket -> ticket.getIsWin() == null)
+                .filter(ticket ->
+                        ticket.getGameResult().getHomeTeam().equals(user.getTeam()) ||
+                                ticket.getGameResult().getAwayTeam().equals(user.getTeam()))
+                .toList();
+
+        // 2. 해당 티켓들에 대해 승/패/무 계산
+        for (Ticket ticket : needToEvaluate) {
+            String result = determineWinStatus(user, ticket.getGameResult());
+            ticket.updateIsWin(result);
+        }
+
+        // 3. 연승 계산 및 DTO 변환
+        Integer streak = calculateWinningStreak(user);
         List<TicketPreviewDTO> ticketPreviewDTOs = buildTicketPreviewDTO(tickets);
-        return ticketPreviewDTOs;
+
+        return new HomeResponseDTO(streak, ticketPreviewDTOs);
     }
 
     /**
@@ -90,7 +114,7 @@ public class TicketService {
         User user = userDetailsService.getUserByContextHolder();
 
         Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new TicketNotFoundException(TICKET_NOT_FOUND_MESSAGE));
+                .orElseThrow(() -> new TicketDetailNotFoundException(TICKET_DETAIL_NOT_FOUND_MESSAGE));
 
         return buildDetailTicketDTO(ticket);
     }
@@ -109,7 +133,7 @@ public class TicketService {
         // 경기 결과 중복 확인
         validateDuplicateTicket(user, gameResult, ocrTicketDTO);
         // 내가 응원하는 팀 승리 여부 판단
-        Boolean isWin = determineIsWin(user, gameResult);
+        String isWin = determineWinStatus(user, gameResult);
         // 티켓 저장
         Ticket ticket = buildTicket(gameResult, ocrTicketDTO, isWin, user);
         ticketRepository.save(ticket);
@@ -140,7 +164,7 @@ public class TicketService {
         // 경기 결과 중복 확인
         validateDuplicateTicket(user, gameResult, ocrTicketDTO);
         // 내가 응원하는 팀 승리 여부 판단
-        Boolean isWin = determineIsWin(user, gameResult);
+        String isWin = determineWinStatus(user, gameResult);
         // 티켓 저장
         Ticket ticket = buildTicket(gameResult, ocrTicketDTO, isWin, user);
         ticketRepository.save(ticket);
@@ -221,7 +245,7 @@ public class TicketService {
         return lineUpDTOs;
     }
 
-    private Ticket buildTicket(GameResult gameResult, OcrTicketDTO ocrTicketDTO, Boolean isWin, User user) {
+    private Ticket buildTicket(GameResult gameResult, OcrTicketDTO ocrTicketDTO, String isWin, User user) {
         return Ticket.builder()
                 .homeTeam(gameResult.getHomeTeam())
                 .awayTeam(gameResult.getAwayTeam())
@@ -321,23 +345,26 @@ public class TicketService {
                 .orElseThrow(() -> new IllegalArgumentException(GAME_RESULT_NOT_FOUND_MESSAGE));
     }
 
-    private Boolean determineIsWin(User user, GameResult gameResult) {
-        if (gameResult.getScoreAwayTeam() == null || gameResult.getScoreHomeTeam() == null) return null;
+    private String determineWinStatus(User user, GameResult gameResult) {
+        Integer scoreHome = gameResult.getScoreHomeTeam();
+        Integer scoreAway = gameResult.getScoreAwayTeam();
 
-        Team winnerTeam = null;
+        if (scoreHome == null || scoreAway == null) return null;
 
-        if (gameResult.getScoreHomeTeam() > gameResult.getScoreAwayTeam()) {
-            winnerTeam = gameResult.getHomeTeam();
-        } else if (gameResult.getScoreHomeTeam() < gameResult.getScoreAwayTeam()) {
-            winnerTeam = gameResult.getAwayTeam();
+        Team userTeam = user.getTeam();
+        boolean isUserTeamInvolved =
+                userTeam.equals(gameResult.getHomeTeam()) || userTeam.equals(gameResult.getAwayTeam());
+
+        if (!isUserTeamInvolved) return null; // 내가 응원하는 팀이 경기에 없으면 무조건 null
+
+        // 무승부
+        if (scoreHome.equals(scoreAway)) {
+            return "무";
         }
 
-        boolean isUserTeamInvolved =
-                user.getTeam().equals(gameResult.getHomeTeam()) || user.getTeam().equals(gameResult.getAwayTeam());
-
-        return (winnerTeam != null && isUserTeamInvolved)
-                ? winnerTeam.equals(user.getTeam())
-                : null;
+        // 승패 판단
+        Team winnerTeam = (scoreHome > scoreAway) ? gameResult.getHomeTeam() : gameResult.getAwayTeam();
+        return winnerTeam.equals(userTeam) ? "승" : "패";
     }
 
     private void validateDuplicateTicket(User user, GameResult gameResult, OcrTicketDTO dto) {
@@ -348,5 +375,62 @@ public class TicketService {
         if (exists) {
             throw new DuplicatedTicketException(DUPLICATED_TICKET_MESSAGE);
         }
+    }
+
+    private Integer calculateWinningStreak(User user) {
+        List<Ticket> tickets = ticketRepository.findByUserIdAndFavoriteTeam(user.getId(), user.getTeam());
+
+        // 내가 응원하는 팀의 티켓 등록이 아직 없다면 null로 처리
+        if(tickets.isEmpty()) {
+            return null;
+        }
+
+        // 내가 응원하는 팀의 티켓 중에서 isWin 기록이 null인 것은 제외
+        List<Ticket> filterTickets = new ArrayList<>();
+        for (Ticket ticket : tickets) {
+            if(ticket.getIsWin() != null) {
+                filterTickets.add(ticket);
+            }
+        }
+
+        for (Ticket filterTicket : filterTickets) {
+            System.out.println(filterTicket.getTicketDate());
+            System.out.println(filterTicket.getIsWin());
+        }
+
+        Integer equalCount = 0;
+        Integer winCount = 1;
+        Integer loseCount = -1;
+
+        // 최신순 정렬
+        filterTickets.sort((a, b) -> b.getTicketDate().compareTo(a.getTicketDate()));
+
+        // 첫 번째로 나온 isWin 판별
+        String firstIsWin = filterTickets.get(0).getIsWin();
+
+        if(firstIsWin.equals("승")) {
+            for (int i = 1; i < filterTickets.size(); i++) {
+                String isWin = filterTickets.get(i).getIsWin();
+                if(isWin.equals(firstIsWin)) {
+                    winCount++;
+                } else {
+                    break;
+                }
+            }
+            return winCount;
+        } else if(firstIsWin.equals("패")) {
+            for (int i = 1; i < filterTickets.size(); i++) {
+                String isWin = filterTickets.get(i).getIsWin();
+                if(isWin.equals(firstIsWin)) {
+                    loseCount--;
+                } else {
+                    break;
+                }
+            }
+            return loseCount;
+        } else if(firstIsWin.equals("무")) {
+            return equalCount;
+        }
+        return null;
     }
 }
