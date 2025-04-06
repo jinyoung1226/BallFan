@@ -123,6 +123,7 @@ public class TicketService {
      * 종이 티켓 이미지를 받아, 종이티켓 OCR 서버로 넘겨주는 메서드
      * @param file
      */
+    @Transactional
     public void registerPaperTicket(MultipartFile file) {
         User user = userDetailsService.getUserByContextHolder();
 
@@ -154,6 +155,7 @@ public class TicketService {
      * 스마트 티켓 이미지를 받아, 스마트 티켓 OCR 서버로 넘겨주는 메서드
      * @param file
      */
+    @Transactional
     public void registerPhoneTicket(MultipartFile file) {
         User user = userDetailsService.getUserByContextHolder();
 
