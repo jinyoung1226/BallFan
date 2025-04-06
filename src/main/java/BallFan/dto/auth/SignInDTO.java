@@ -1,6 +1,6 @@
 package BallFan.dto.auth;
 
-import BallFan.dto.Response.BaseResponse;
+import BallFan.dto.response.BaseResponse;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 
