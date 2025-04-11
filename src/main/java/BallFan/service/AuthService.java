@@ -44,6 +44,7 @@ public class AuthService {
                     .email(request.getEmail())
                     .password(passwordEncoder.encode(request.getPassword()))
                     .nickname(request.getNickname())
+                    .team(request.getTeam())
                     .build();
             userRepository.save(user);
         } catch (DataIntegrityViolationException e) {
