@@ -3,12 +3,10 @@ package BallFan.service;
 import BallFan.authentication.UserDetailsServiceImpl;
 import BallFan.dto.record.MyWinRateDTO;
 import BallFan.dto.record.UserRankingDTO;
-import BallFan.entity.Team;
 import BallFan.entity.Ticket;
 import BallFan.entity.user.User;
 import BallFan.repository.TicketRepository;
 import BallFan.repository.UserRepository;
-import BallFan.service.ticket.TicketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,10 +22,38 @@ public class RecordService {
     private final TicketRepository ticketRepository;
     private final UserRepository userRepository;
 
+    /**
+     * 나의 ?승 ?무 ?패 구하는 메서드
+     * @return MyWinRateDTO
+     */
     public MyWinRateDTO getMyWinRate() {
         User user = userDetailsService.getUserByContextHolder();
         return calculateMyWinRate(user);
 
+    }
+
+    /**
+     * 내가 응원하는 팀 유저 중 연승 기록 구하는 메서드
+     * @return List<UserRankingDTO>
+     */
+    public List<UserRankingDTO> getTeamWinRateRanking() {
+        User user = userDetailsService.getUserByContextHolder();
+
+        List<User> myTeamUsers = userRepository.findByTeam(user.getTeam());
+
+        return calculateRanking(myTeamUsers, user, 3);
+    }
+
+    /**
+     * 앱 내 유저 중 연승 기록 구하는 메서드
+     * @return List<UserRankingDTO>
+     */
+    public List<UserRankingDTO> getAppWinRateRanking() {
+        User user = userDetailsService.getUserByContextHolder();
+
+        List<User> allUser = userRepository.findAll();
+
+        return calculateRanking(allUser, user, 10);
     }
 
     private MyWinRateDTO calculateMyWinRate(User user) {
@@ -52,14 +78,10 @@ public class RecordService {
         return new MyWinRateDTO(winCount, drawCount, loseCount);
     }
 
-    public List<UserRankingDTO> getTeamWinRateRanking() {
-        User user = userDetailsService.getUserByContextHolder();
-
-        List<User> myTeamUsers = userRepository.findByTeam(user.getTeam());
-
+    private List<UserRankingDTO> calculateRanking(List<User> userList, User user, int rankRange) {
         // 1. 연승 기록이 있는 유저만 필터링 (null 제외, 0도 포함)
         List<User> filteredUsers = new ArrayList<>();
-        for (User userOne : myTeamUsers) {
+        for (User userOne : userList) {
             if(userOne.getCurrentWinStreak() != null){
                 filteredUsers.add(userOne);
             }
@@ -89,7 +111,7 @@ public class RecordService {
                 myRanking = userRankingDTO;
             }
 
-            if (rank <= 3) {
+            if (rank <= rankRange) {
                 result.add(userRankingDTO);
             }
 
@@ -99,7 +121,7 @@ public class RecordService {
         // 4. 본인이 TOP 3 안에 없으면 내 순위 추가
         boolean alreadyIncluded = false;
         for (UserRankingDTO dto : result) {
-            if (dto.getId().equals(myRanking.getId())) {
+            if (myRanking != null && dto.getId().equals(myRanking.getId())) {
                 alreadyIncluded = true;
                 break;
             }

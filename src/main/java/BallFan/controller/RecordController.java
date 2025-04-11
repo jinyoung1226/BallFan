@@ -30,4 +30,10 @@ public class RecordController {
         return ResponseEntity.ok(teamWinRateRanking);
     }
 
+    @GetMapping("/app-win-rate-ranking")
+    public ResponseEntity<List<UserRankingDTO>> getAppWinRateRanking() {
+        List<UserRankingDTO> appWinRateRanking = recordService.getAppWinRateRanking();
+        return ResponseEntity.ok(appWinRateRanking);
+    }
+
 }
