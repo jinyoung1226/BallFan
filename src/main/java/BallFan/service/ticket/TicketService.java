@@ -83,7 +83,7 @@ public class TicketService {
             return new HomeResponseDTO(null, buildTicketPreviewDTO(tickets));
         }
 
-        // 여기부터 조회할 때마다 연승 계산을 최신활를 반영하여 계산하기 위한 로직
+        // 여기부터 조회할 때마다 연승 계산을 최신화를 반영하여 계산하기 위한 로직
         // 1. isWin == null && 내가 응원하는 팀이 경기한 티켓만 필터링
         List<Ticket> needToEvaluate = tickets.stream()
                 .filter(ticket -> ticket.getIsWin() == null)
@@ -208,6 +208,12 @@ public class TicketService {
     private DetailTicketDTO buildDetailTicketDTO(Ticket ticket) {
         List<PitcherDTO> pitcherDTOs = mapToPitcherDTOs(ticket);
         List<LineUpDTO> lineUpDTOs = mapToLineUpDTOs(ticket);
+
+        // 하나라도 null이면 빈 DetailTicketDTO 반환
+        if (pitcherDTOs.isEmpty() || lineUpDTOs.isEmpty()) {
+            return DetailTicketDTO.builder()
+                    .build();
+        }
 
         DayOfWeek dayOfWeek = ticket.getGameResult().getGameDate().getDayOfWeek();
         String koreanDay = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.KOREAN);
