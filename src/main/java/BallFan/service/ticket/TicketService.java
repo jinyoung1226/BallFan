@@ -102,13 +102,16 @@ public class TicketService {
         Integer streak = calculateWinningStreak(user);
         List<TicketPreviewDTO> ticketPreviewDTOs = buildTicketPreviewDTO(tickets);
 
+        // 4. 연승 기록 User entity에 저장
+        user.updateCurrentWinStreak(streak);
+
         return new HomeResponseDTO(streak, ticketPreviewDTOs);
     }
 
     /**
      * 티켓 상세정보 조회하는 메서드
-     * @param ticketId
-     * @return
+     * @param ticketId 조회할 티켓의 ID
+     * @return 상세 티켓 정보 DTO
      */
     public DetailTicketDTO getTicketDetail(Long ticketId) {
         User user = userDetailsService.getUserByContextHolder();
@@ -121,7 +124,7 @@ public class TicketService {
 
     /**
      * 종이 티켓 이미지를 받아, 종이티켓 OCR 서버로 넘겨주는 메서드
-     * @param file
+     * @param file 등록할 티켓 파일 이미지
      */
     @Transactional
     public void registerPaperTicket(MultipartFile file) {

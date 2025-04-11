@@ -41,7 +41,7 @@ public class User {
     private String image;
 
     @Column(name = "current_win_streak")
-    private int currentWinStreak;
+    private Integer currentWinStreak;
 
     @Column(name = "monthly_win_count")
     private int monthlyWinCount;
@@ -59,6 +59,10 @@ public class User {
 
     public void updateImage(String image) {
         this.image = image;
+    }
+
+    public void updateCurrentWinStreak(Integer currentWinStreak) {
+        this.currentWinStreak = currentWinStreak;
     }
 
 }
