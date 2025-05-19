@@ -4,6 +4,7 @@ import BallFan.dto.response.ErrorResponse;
 import BallFan.exception.auth.BlackListedTokenException;
 import BallFan.exception.auth.DifferentRefreshTokenException;
 import BallFan.exception.auth.DuplicatedSignUpException;
+import BallFan.exception.review.ReviewAlreadyExistsException;
 import BallFan.exception.stadium.StadiumVisitNotFoundException;
 import BallFan.exception.ticket.DuplicatedTicketException;
 import BallFan.exception.ticket.TicketDetailNotFoundException;
@@ -62,6 +63,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(StadiumVisitNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleStadiumVisitNotFoundException(StadiumVisitNotFoundException e) {
+        return new ResponseEntity<>(ErrorResponse.builder()
+                .message(e.getMessage())
+                .build(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ReviewAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleReviewAlreadyExistsException(ReviewAlreadyExistsException e) {
         return new ResponseEntity<>(ErrorResponse.builder()
                 .message(e.getMessage())
                 .build(), HttpStatus.NOT_FOUND);
