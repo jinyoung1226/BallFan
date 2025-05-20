@@ -9,6 +9,7 @@ import BallFan.dto.ticket.OcrTicketDTO;
 import BallFan.dto.ticket.TicketPreviewDTO;
 import BallFan.entity.*;
 import BallFan.entity.pitcher.PitcherStat;
+import BallFan.entity.review.Review;
 import BallFan.entity.user.User;
 import BallFan.exception.ticket.DuplicatedTicketException;
 import BallFan.exception.ticket.TicketDetailNotFoundException;
@@ -221,6 +222,17 @@ public class TicketService {
         DayOfWeek dayOfWeek = ticket.getGameResult().getGameDate().getDayOfWeek();
         String koreanDay = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.KOREAN);
 
+        Review review = ticket.getReview();
+        boolean checkReview = false;
+
+        if (review == null) {
+            // 리뷰가 없을 때 처리
+            checkReview = false;
+        } else {
+            // 리뷰가 있을 때 처리
+            checkReview = true;
+        }
+
         return DetailTicketDTO.builder()
                 .stadium(ticket.getGameResult().getStadium())
                 .gameDate(ticket.getGameResult().getGameDate())
@@ -233,7 +245,7 @@ public class TicketService {
                 .lineUps(lineUpDTOs)
                 .seat(ticket.getSeat())
                 .isWin(ticket.getIsWin())
-                .hasReview(ticket.isHasReview())
+                .hasReview(checkReview)
                 .build();
     }
 
@@ -262,7 +274,6 @@ public class TicketService {
                 .awayTeam(gameResult.getAwayTeam())
                 .ticketDate(ocrTicketDTO.getTicketDate())
                 .seat(ocrTicketDTO.getSeat())
-                .hasReview(false)
                 .isWin(isWin)
                 .createdDate(LocalDate.now())
                 .gameResult(gameResult)

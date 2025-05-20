@@ -1,5 +1,6 @@
 package BallFan.entity;
 
+import BallFan.entity.review.Review;
 import BallFan.entity.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -39,9 +40,6 @@ public class Ticket {
     @Column(name = "is_win", nullable = true)
     private String isWin;
 
-    @Column(name = "has_review")
-    private boolean hasReview;
-
     @Column(name = "image")
     private String image;
 
@@ -53,6 +51,10 @@ public class Ticket {
     @JoinColumn(name = "game_result_id")
     private GameResult gameResult;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "review_id")
+    private Review review;
+
 
     public void updateImage(String image) {
         this.image = image;
@@ -61,4 +63,5 @@ public class Ticket {
     public void updateIsWin(String isWin) {
         this.isWin = isWin;
     }
+
 }
