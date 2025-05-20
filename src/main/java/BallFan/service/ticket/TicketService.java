@@ -222,11 +222,7 @@ public class TicketService {
         DayOfWeek dayOfWeek = ticket.getGameResult().getGameDate().getDayOfWeek();
         String koreanDay = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.KOREAN);
 
-        boolean checkReview = false;
-
-        if (ticket.getReview() != null && ticket.getReview().getId() != null) {
-            checkReview = true;
-        }
+        boolean hasReview = ticket.getReview() != null;
 
         return DetailTicketDTO.builder()
                 .stadium(ticket.getGameResult().getStadium())
@@ -240,7 +236,7 @@ public class TicketService {
                 .lineUps(lineUpDTOs)
                 .seat(ticket.getSeat())
                 .isWin(ticket.getIsWin())
-                .hasReview(checkReview)
+                .hasReview(hasReview)
                 .build();
     }
 

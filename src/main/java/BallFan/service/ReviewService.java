@@ -268,6 +268,9 @@ public class ReviewService {
         // 리뷰 엔티티 생성
         Review review = createReviewEntity(content, stadium, seat, ticket, user);
 
+        // 해당 티켓에 리뷰 id 삽입
+        ticket.updateReview(review);
+
         // 리뷰 사진 등록
         attachReviewPhotos(review, photos);
 

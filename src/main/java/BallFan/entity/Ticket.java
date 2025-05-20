@@ -64,4 +64,8 @@ public class Ticket {
         this.isWin = isWin;
     }
 
+    public void updateReview(Review review) {
+        this.review = review;
+    }
+
 }
