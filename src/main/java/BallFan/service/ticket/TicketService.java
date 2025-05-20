@@ -222,14 +222,9 @@ public class TicketService {
         DayOfWeek dayOfWeek = ticket.getGameResult().getGameDate().getDayOfWeek();
         String koreanDay = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.KOREAN);
 
-        Review review = ticket.getReview();
         boolean checkReview = false;
 
-        if (review == null) {
-            // 리뷰가 없을 때 처리
-            checkReview = false;
-        } else {
-            // 리뷰가 있을 때 처리
+        if (ticket.getReview() != null && ticket.getReview().getId() != null) {
             checkReview = true;
         }
 
