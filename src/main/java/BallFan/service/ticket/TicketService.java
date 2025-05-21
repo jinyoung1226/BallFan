@@ -3,13 +3,9 @@ package BallFan.service.ticket;
 import BallFan.authentication.UserDetailsServiceImpl;
 import BallFan.dto.line_up.LineUpDTO;
 import BallFan.dto.pitcher.PitcherDTO;
-import BallFan.dto.ticket.DetailTicketDTO;
-import BallFan.dto.ticket.HomeResponseDTO;
-import BallFan.dto.ticket.OcrTicketDTO;
-import BallFan.dto.ticket.TicketPreviewDTO;
+import BallFan.dto.ticket.*;
 import BallFan.entity.*;
 import BallFan.entity.pitcher.PitcherStat;
-import BallFan.entity.review.Review;
 import BallFan.entity.user.User;
 import BallFan.exception.ticket.DuplicatedTicketException;
 import BallFan.exception.ticket.TicketDetailNotFoundException;
@@ -123,57 +119,53 @@ public class TicketService {
         return buildDetailTicketDTO(ticket);
     }
 
+
     /**
-     * 종이 티켓 이미지를 받아, 종이티켓 OCR 서버로 넘겨주는 메서드
+     * 티켓 스캔해서 DTO 반환하는 메서드
      * @param file 등록할 티켓 파일 이미지
      */
-    @Transactional
-    public void registerPaperTicket(MultipartFile file) {
+    public ScanTicketDTO scanPaperTicket(MultipartFile file) {
         User user = userDetailsService.getUserByContextHolder();
 
-        // 종이티켓 OCR 등록
+        // 종이티켓 OCR
         OcrTicketDTO ocrTicketDTO = requestPaperTicketOcr(file);
         // 경기 결과 조회
         GameResult gameResult = findGameResult(ocrTicketDTO);
         // 경기 결과 중복 확인
         validateDuplicateTicket(user, gameResult, ocrTicketDTO);
-        // 내가 응원하는 팀 승리 여부 판단
-        String isWin = determineWinStatus(user, gameResult);
-        // 티켓 저장
-        Ticket ticket = buildTicket(gameResult, ocrTicketDTO, isWin, user);
-        ticketRepository.save(ticket);
-        // 경기장 방문 테이블 저장
-        StadiumVisit stadiumVisit = stadiumVisitRepository.findByUserIdAndStadium(user.getId(), gameResult.getStadium())
-                .orElseGet(() -> stadiumVisitRepository.save(
-                        StadiumVisit.builder()
-                                .user(user)
-                                .visitCount(1)
-                                .stadium(gameResult.getStadium())
-                                .build()
-                ));
-        // 이미 경기장 방문 기록이 있다면, 방문 횟수만 증가
-        stadiumVisit.increaseVisitCount();
+
+        return ScanTicketDTO.builder()
+                .gameDate(gameResult.getGameDate())
+                .stadium(gameResult.getStadium())
+                .homeTeam(gameResult.getHomeTeam())
+                .awayTeam(gameResult.getAwayTeam())
+                .seat(ocrTicketDTO.getSeat())
+                .build();
     }
 
+
     /**
-     * 스마트 티켓 이미지를 받아, 스마트 티켓 OCR 서버로 넘겨주는 메서드
-     * @param file
+     * 티켓 등록하는 메서드
+     * @param awayTeam
+     * @param homeTeam
+     * @param stadium
+     * @param seat
+     * @param gameDate
      */
     @Transactional
-    public void registerPhoneTicket(MultipartFile file) {
+    public void registerPaperTicket(Team awayTeam, Team homeTeam, String stadium, LocalDate gameDate, String seat) {
         User user = userDetailsService.getUserByContextHolder();
 
-        // 스마트티켓 OCR 등록
-        OcrTicketDTO ocrTicketDTO = requestPhoneTicketOcr(file);
-        // 경기 결과 조회
-        GameResult gameResult = findGameResult(ocrTicketDTO);
-        // 경기 결과 중복 확인
-        validateDuplicateTicket(user, gameResult, ocrTicketDTO);
+        GameResult gameResult = gameResultRepository.findByAwayTeamAndGameDate(awayTeam, gameDate)
+                .orElseThrow(() -> new IllegalArgumentException(GAME_RESULT_NOT_FOUND_MESSAGE));
+
         // 내가 응원하는 팀 승리 여부 판단
         String isWin = determineWinStatus(user, gameResult);
+
         // 티켓 저장
-        Ticket ticket = buildTicket(gameResult, ocrTicketDTO, isWin, user);
+        Ticket ticket = buildTicket(gameResult, gameDate, seat, isWin, user);
         ticketRepository.save(ticket);
+
         // 경기장 방문 테이블 저장
         StadiumVisit stadiumVisit = stadiumVisitRepository.findByUserIdAndStadium(user.getId(), gameResult.getStadium())
                 .orElseGet(() -> stadiumVisitRepository.save(
@@ -185,7 +177,6 @@ public class TicketService {
                 ));
         // 이미 경기장 방문 기록이 있다면, 방문 횟수만 증가
         stadiumVisit.increaseVisitCount();
-
     }
 
     /**
@@ -259,12 +250,12 @@ public class TicketService {
         return lineUpDTOs;
     }
 
-    private Ticket buildTicket(GameResult gameResult, OcrTicketDTO ocrTicketDTO, String isWin, User user) {
+    private Ticket buildTicket(GameResult gameResult, LocalDate gameDate, String seat, String isWin, User user) {
         return Ticket.builder()
                 .homeTeam(gameResult.getHomeTeam())
                 .awayTeam(gameResult.getAwayTeam())
-                .ticketDate(ocrTicketDTO.getTicketDate())
-                .seat(ocrTicketDTO.getSeat())
+                .ticketDate(gameDate)
+                .seat(seat)
                 .isWin(isWin)
                 .createdDate(LocalDate.now())
                 .gameResult(gameResult)
@@ -308,35 +299,6 @@ public class TicketService {
             // 비동기 -> 동기 방식으로 전환하여 response에 Json 담기
             String response = webClient.post()
                     .uri("/upload_paperTicket")
-                    .contentType(MediaType.MULTIPART_FORM_DATA)
-                    .body(BodyInserters.fromMultipartData(builder.build()))
-                    .retrieve()
-                    .bodyToMono(String.class)
-                    .block();
-
-            // Json -> 객체로 역직렬화
-            // annotation JsonProperty 설정해야 같은 이름으로 판정되어 인식함
-            return objectMapper.readValue(response, OcrTicketDTO.class);
-
-        } catch (IOException e) {
-            throw new RuntimeException("이미지 전송 실패", e);
-        }
-    }
-
-    private OcrTicketDTO requestPhoneTicketOcr(MultipartFile file) {
-        try {
-            MultipartBodyBuilder builder = new MultipartBodyBuilder();
-
-            builder.part("file", new ByteArrayResource(file.getBytes()) {
-                @Override
-                public String getFilename() {
-                    return "dummy.png";
-                }
-            }).contentType(MediaType.APPLICATION_OCTET_STREAM);
-
-            // 비동기 -> 동기 방식으로 전환하여 response에 Json 담기
-            String response = webClient.post()
-                    .uri("/upload_phoneTicket")
                     .contentType(MediaType.MULTIPART_FORM_DATA)
                     .body(BodyInserters.fromMultipartData(builder.build()))
                     .retrieve()

@@ -1,5 +1,6 @@
 package BallFan.dto.ticket;
 
+import BallFan.entity.Team;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,13 +12,11 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TicketPreviewDTO {
+public class ScanTicketDTO {
 
-    private Long id;
+    private LocalDate gameDate;
     private String stadium;
-    private LocalDate ticketDate;
-    private String dayOfWeek;
-    private String homeTeam;
-    private String awayTeam;
-
+    private Team homeTeam;
+    private Team awayTeam;
+    private String seat;
 }

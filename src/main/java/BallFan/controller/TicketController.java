@@ -2,11 +2,15 @@ package BallFan.controller;
 
 import BallFan.dto.ticket.DetailTicketDTO;
 import BallFan.dto.ticket.HomeResponseDTO;
+import BallFan.dto.ticket.ScanTicketDTO;
+import BallFan.entity.Team;
 import BallFan.service.ticket.TicketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/ticket")
@@ -27,15 +31,19 @@ public class TicketController {
         return ResponseEntity.ok(ticketDetail);
     }
 
-    @PostMapping("/paper")
-    public ResponseEntity<Void> registerPaperTicket(@RequestPart MultipartFile file) {
-        ticketService.registerPaperTicket(file);
-        return ResponseEntity.ok().build();
+    @PostMapping("/paper/scan")
+    public ResponseEntity<ScanTicketDTO> scanPaperTicket(@RequestPart MultipartFile file) {
+        ScanTicketDTO scanTicketDTO = ticketService.scanPaperTicket(file);
+        return ResponseEntity.ok(scanTicketDTO);
     }
 
-    @PostMapping("/phone")
-    public ResponseEntity<Void> registerPhoneTicket(@RequestPart MultipartFile file) {
-        ticketService.registerPhoneTicket(file);
+    @PostMapping("/paper/register")
+    public ResponseEntity<Void> registerPaperTicket(@RequestParam(name = "awayTeam") Team awayTeam,
+                                                             @RequestParam(name = "homeTeam") Team homeTeam,
+                                                             @RequestParam(name = "stadium") String stadium,
+                                                             @RequestParam(name = "gameDate")LocalDate gameDate,
+                                                             @RequestParam(name = "seat") String seat) {
+        ticketService.registerPaperTicket(homeTeam, awayTeam, stadium, gameDate, seat);
         return ResponseEntity.ok().build();
     }
 
