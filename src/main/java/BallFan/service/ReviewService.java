@@ -18,12 +18,14 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -59,7 +61,7 @@ public class ReviewService {
                 .seat(seat)
                 .content(content)
                 .stadium(stadium)
-                .createdAt(LocalDate.now())
+                .createdAt(LocalDateTime.now())
                 .likes(0)
                 .ticket(ticket)
                 .user(user)
@@ -263,6 +265,29 @@ public class ReviewService {
                 .build();
     }
 
+    private AllReviewResponse convertToDTO(Review review, User user) {
+        List<ReviewPhotoDto> photos = review.getPhotos() != null
+                ? review.getPhotos().stream()
+                .map(photo -> ReviewPhotoDto.builder()
+                        .id(photo.getId())
+                        .photoUrl(photo.getPhotoUrl())
+                        .build())
+                .collect(Collectors.toList())
+                : Collections.emptyList();
+
+        return AllReviewResponse.builder()
+                .id(review.getId())
+                .nickname(user.getNickname())
+                .image(user.getImage())
+                .seat(review.getSeat())
+                .content(review.getContent())
+                .stadium(review.getStadium())
+                .likes(review.getLikes())
+                .createdAt(review.getCreatedAt())
+                .photos(photos)
+                .build();
+    }
+
     /**
      * 리뷰 등록하는 메서드
      * @param content 리뷰 텍스트
@@ -397,5 +422,15 @@ public class ReviewService {
                 .summaryKeywords(similarKeyword)
                 .places(placeInfo)
                 .build();
+    }
+
+    public Page<AllReviewResponse> getAllReview(Pageable pageable) {
+        User user = userDetailsService.getUserByContextHolder();
+
+        Page<Review> reviewPage = reviewRepository.findAllByOrderByCreatedAtDesc(pageable);
+
+        return reviewPage.isEmpty()
+                ? Page.empty()
+                : reviewPage.map(review -> convertToDTO(review, user));
     }
 }
