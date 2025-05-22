@@ -129,6 +129,7 @@ public class TicketService {
 
         // 종이티켓 OCR
         OcrTicketDTO ocrTicketDTO = requestPaperTicketOcr(file);
+        System.out.println(ocrTicketDTO);
         // 경기 결과 조회
         GameResult gameResult = findGameResult(ocrTicketDTO);
         // 경기 결과 중복 확인
