@@ -159,7 +159,7 @@ public class TicketService {
 
         // 내가 응원하는 팀 승리 여부 판단
         String isWin = determineWinStatus(user, gameResult);
-
+        System.out.println(isWin);
         // 티켓 저장
         Ticket ticket = buildTicket(gameResult, gameDate, seat, isWin, user);
         ticketRepository.save(ticket);
