@@ -147,13 +147,11 @@ public class TicketService {
     /**
      * 티켓 등록하는 메서드
      * @param awayTeam
-     * @param homeTeam
-     * @param stadium
      * @param seat
      * @param gameDate
      */
     @Transactional
-    public void registerPaperTicket(Team awayTeam, Team homeTeam, String stadium, LocalDate gameDate, String seat) {
+    public void registerPaperTicket(Team awayTeam, LocalDate gameDate, String seat) {
         User user = userDetailsService.getUserByContextHolder();
 
         GameResult gameResult = gameResultRepository.findByAwayTeamAndGameDate(awayTeam, gameDate)

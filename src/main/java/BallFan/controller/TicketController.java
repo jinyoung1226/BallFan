@@ -39,11 +39,9 @@ public class TicketController {
 
     @PostMapping("/paper/register")
     public ResponseEntity<Void> registerPaperTicket(@RequestParam(name = "awayTeam") Team awayTeam,
-                                                             @RequestParam(name = "homeTeam") Team homeTeam,
-                                                             @RequestParam(name = "stadium") String stadium,
-                                                             @RequestParam(name = "gameDate")LocalDate gameDate,
-                                                             @RequestParam(name = "seat") String seat) {
-        ticketService.registerPaperTicket(homeTeam, awayTeam, stadium, gameDate, seat);
+                                                    @RequestParam(name = "gameDate")LocalDate gameDate,
+                                                    @RequestParam(name = "seat") String seat) {
+        ticketService.registerPaperTicket(awayTeam, gameDate, seat);
         return ResponseEntity.ok().build();
     }
 
