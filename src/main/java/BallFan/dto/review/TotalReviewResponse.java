@@ -14,8 +14,8 @@ import java.util.List;
 public class TotalReviewResponse {
 
     private ReviewResponse reviewResponse;
-    private List<Long> similarSeatReviewIds;
-    private List<Long> similarTextReviewIds;
+    private List<SimpleReviewDTO> similarSeatReviews;
+    private List<SimpleReviewDTO> similarTextReviews;
     private List<String> summaryKeywords;
     private List<PlaceInfo> places;
 

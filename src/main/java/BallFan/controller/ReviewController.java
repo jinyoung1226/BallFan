@@ -2,7 +2,6 @@ package BallFan.controller;
 
 import BallFan.dto.response.BaseResponse;
 import BallFan.dto.review.TotalReviewResponse;
-import BallFan.entity.review.Review;
 import BallFan.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

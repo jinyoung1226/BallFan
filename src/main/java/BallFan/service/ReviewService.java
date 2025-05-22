@@ -26,6 +26,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -245,6 +246,24 @@ public class ReviewService {
     }
 
     /**
+     * 리뷰 객체 생성하는 메서드
+     * @param review 리뷰
+     * @return 리뷰 객체
+     */
+    private SimpleReviewDTO toSimpleReviewDto(Review review) {
+        String photoUrl = null;
+        if (review.getPhotos() != null && !review.getPhotos().isEmpty()) {
+            photoUrl = review.getPhotos().get(0).getPhotoUrl();
+        }
+        return SimpleReviewDTO.builder()
+                .id(review.getId())
+                .seat(review.getSeat())
+                .photoUrl(photoUrl)
+                .likes(review.getLikes())
+                .build();
+    }
+
+    /**
      * 리뷰 등록하는 메서드
      * @param content 리뷰 텍스트
      * @param stadium 리뷰 경기장
@@ -326,16 +345,29 @@ public class ReviewService {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ReviewNotFoundException(REVIEW_NOT_FOUND_MESSAGE));
 
-        // 유사 좌석 리뷰 ID 조회
+        // 유사 좌석 리뷰 객체 조회 및 생성
         List<Long> similarSeatReviewIds = getSimilarSeatReviewIds(review);
+        List<SimpleReviewDTO> similarSeatReviews = similarSeatReviewIds.stream()
+                .map(id -> reviewRepository.findById(id)
+                        .map(this::toSimpleReviewDto)
+                        .orElse(null))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
 
-        // 유사 좌석 리뷰 ID 조회
+        // 유사 텍스트 리뷰 객체 조회 및 생성
         List<Long> similarTextReviewIds = getSimilarTextReviewIds(review);
+        List<SimpleReviewDTO> similarTextReviews = similarTextReviewIds.stream()
+                .map(id -> reviewRepository.findById(id)
+                        .map(this::toSimpleReviewDto)
+                        .orElse(null))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
 
         // 유사 키워드 조회
         List<String> similarKeyword = getSimilarKeyword(review);
 
-        // 해당 리뷰의 장소 정보 조회(네이버 맵 api에서 활용 가능)
+        // 해당 리뷰의 장소 정보 조회
         List<PlaceInfo> placeInfo = getPlaceInfo(review);
 
         List<ReviewPhotoDto> photoDtos = review.getPhotos().stream()
@@ -360,8 +392,8 @@ public class ReviewService {
         // 모든 리뷰 정보 조회 반환
         return TotalReviewResponse.builder()
                 .reviewResponse(reviewResponse)
-                .similarSeatReviewIds(similarSeatReviewIds)
-                .similarTextReviewIds(similarTextReviewIds)
+                .similarSeatReviews(similarSeatReviews)
+                .similarTextReviews(similarTextReviews)
                 .summaryKeywords(similarKeyword)
                 .places(placeInfo)
                 .build();
