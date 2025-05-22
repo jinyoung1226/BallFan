@@ -254,16 +254,27 @@ public class ReviewService {
      * @param review 리뷰
      * @return 리뷰 객체
      */
-    private SimpleReviewDTO toSimpleReviewDto(Review review) {
+    private SimpleReviewDTO toSimpleReviewDto(Review review, User user) {
         String photoUrl = null;
         if (review.getPhotos() != null && !review.getPhotos().isEmpty()) {
             photoUrl = review.getPhotos().get(0).getPhotoUrl();
         }
+
+        // 리뷰 정보 조회
+        List<ReviewLike> likeList = review.getLikeList();
+        boolean liked = false;
+        for (ReviewLike reviewLike : likeList) {
+            if(reviewLike.getUser().getId().equals(user.getId())) {
+                liked = true;
+            }
+        }
+
         return SimpleReviewDTO.builder()
                 .id(review.getId())
                 .seat(review.getSeat())
                 .photoUrl(photoUrl)
                 .likes(review.getLikes())
+                .liked(liked)
                 .build();
     }
 
@@ -389,7 +400,7 @@ public class ReviewService {
         List<Long> similarSeatReviewIds = getSimilarSeatReviewIds(review);
         List<SimpleReviewDTO> similarSeatReviews = similarSeatReviewIds.stream()
                 .map(id -> reviewRepository.findById(id)
-                        .map(this::toSimpleReviewDto)
+                        .map(r -> toSimpleReviewDto(r, user))
                         .orElse(null))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
@@ -398,7 +409,7 @@ public class ReviewService {
         List<Long> similarTextReviewIds = getSimilarTextReviewIds(review);
         List<SimpleReviewDTO> similarTextReviews = similarTextReviewIds.stream()
                 .map(id -> reviewRepository.findById(id)
-                        .map(this::toSimpleReviewDto)
+                        .map(r -> toSimpleReviewDto(r, user))
                         .orElse(null))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
@@ -417,7 +428,6 @@ public class ReviewService {
                         .build())
                 .collect(Collectors.toList());
 
-
         // 리뷰 정보 조회
         List<ReviewLike> likeList = review.getLikeList();
         boolean liked = false;
@@ -426,6 +436,7 @@ public class ReviewService {
                 liked = true;
             }
         }
+
         ReviewResponse reviewResponse = ReviewResponse.builder()
                 .id(review.getId())
                 .seat(review.getSeat())

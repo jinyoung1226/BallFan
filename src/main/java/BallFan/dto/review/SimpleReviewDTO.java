@@ -15,4 +15,5 @@ public class SimpleReviewDTO {
     private String seat;
     private String photoUrl;
     private int likes;
+    private boolean liked;
 }
