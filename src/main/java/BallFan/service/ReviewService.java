@@ -26,6 +26,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -275,6 +277,14 @@ public class ReviewService {
                 .collect(Collectors.toList())
                 : Collections.emptyList();
 
+        List<ReviewLike> likeList = review.getLikeList();
+        boolean liked = false;
+        for (ReviewLike reviewLike : likeList) {
+            if(reviewLike.getUser().getId().equals(user.getId())) {
+                liked = true;
+            }
+        }
+
         return AllReviewResponse.builder()
                 .id(review.getId())
                 .nickname(user.getNickname())
@@ -283,6 +293,7 @@ public class ReviewService {
                 .content(review.getContent())
                 .stadium(review.getStadium())
                 .likes(review.getLikes())
+                .liked(liked)
                 .createdAt(review.getCreatedAt())
                 .photos(photos)
                 .build();
@@ -408,6 +419,13 @@ public class ReviewService {
 
 
         // 리뷰 정보 조회
+        List<ReviewLike> likeList = review.getLikeList();
+        boolean liked = false;
+        for (ReviewLike reviewLike : likeList) {
+            if(reviewLike.getUser().getId().equals(user.getId())) {
+                liked = true;
+            }
+        }
         ReviewResponse reviewResponse = ReviewResponse.builder()
                 .id(review.getId())
                 .seat(review.getSeat())
@@ -415,6 +433,7 @@ public class ReviewService {
                 .stadium(review.getStadium())
                 .createdAt(review.getCreatedAt())
                 .likes(review.getLikes())
+                .liked(liked)
                 .photos(photoDtos)
                 .build();
 
@@ -467,6 +486,7 @@ public class ReviewService {
             ReviewLike newLike = ReviewLike.builder()
                     .user(user)
                     .review(review)
+                    .createdAt(LocalDate.now())
                     .build();
             reviewLikeRepository.save(newLike);
 

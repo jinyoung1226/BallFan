@@ -21,6 +21,7 @@ public class AllReviewResponse {
     private String content;
     private String stadium;
     private int likes;
+    private boolean liked;
     private LocalDateTime createdAt;
     private List<ReviewPhotoDto> photos;
 }
