@@ -31,6 +31,11 @@ public class ReviewController {
         return ResponseEntity.ok(baseResponse);
     }
 
+//    @PostMapping("/like/{reviewId}")
+//    public ResponseEntity<> pressLike(@PathVariable Long reviewId) {
+//        reviewService.pressLike(reviewId);
+//    }
+
     @DeleteMapping("/{reviewId}")
     public ResponseEntity<BaseResponse> deleteReview(@PathVariable Long reviewId) {
         BaseResponse baseResponse = reviewService.deleteReview(reviewId);

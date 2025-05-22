@@ -343,6 +343,10 @@ public class ReviewService {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ReviewNotFoundException(REVIEW_NOT_FOUND_MESSAGE));
 
+        // 해당 티켓에서 리뷰 id 삭제 먼저 조치
+        Ticket ticket = review.getTicket();
+        ticket.updateReview(null);
+
         // 해당 리뷰 삭제
         reviewRepository.delete(review);
 
@@ -424,6 +428,11 @@ public class ReviewService {
                 .build();
     }
 
+    /**
+     * 전체 리뷰 조회하는 메서드
+     * @param pageable
+     * @return 리뷰 전체 반환
+     */
     public Page<AllReviewResponse> getAllReview(Pageable pageable) {
         User user = userDetailsService.getUserByContextHolder();
 
@@ -432,5 +441,21 @@ public class ReviewService {
         return reviewPage.isEmpty()
                 ? Page.empty()
                 : reviewPage.map(review -> convertToDTO(review, user));
+    }
+
+    /**
+     * 리뷰에 좋아요 하는 메서드
+     * @param reviewId 리뷰 ID
+     */
+    public void pressLike(Long reviewId) {
+        User user = userDetailsService.getUserByContextHolder();
+
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ReviewNotFoundException(REVIEW_NOT_FOUND_MESSAGE));
+
+
+
+
+
     }
 }
