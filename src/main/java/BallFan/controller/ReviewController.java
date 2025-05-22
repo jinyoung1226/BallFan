@@ -31,10 +31,11 @@ public class ReviewController {
         return ResponseEntity.ok(baseResponse);
     }
 
-//    @PostMapping("/like/{reviewId}")
-//    public ResponseEntity<> pressLike(@PathVariable Long reviewId) {
-//        reviewService.pressLike(reviewId);
-//    }
+    @PostMapping("/like/{reviewId}")
+    public ResponseEntity<Void> pressLike(@PathVariable Long reviewId) {
+        reviewService.pressLike(reviewId);
+        return ResponseEntity.ok().build();
+    }
 
     @DeleteMapping("/{reviewId}")
     public ResponseEntity<BaseResponse> deleteReview(@PathVariable Long reviewId) {

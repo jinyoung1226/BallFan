@@ -5,11 +5,13 @@ import BallFan.dto.response.BaseResponse;
 import BallFan.dto.review.*;
 import BallFan.entity.Ticket;
 import BallFan.entity.review.Review;
+import BallFan.entity.review.ReviewLike;
 import BallFan.entity.review.ReviewPhoto;
 import BallFan.entity.user.User;
 import BallFan.exception.review.ReviewAlreadyExistsException;
 import BallFan.exception.review.ReviewNotFoundException;
 import BallFan.exception.ticket.TicketNotFoundException;
+import BallFan.repository.ReviewLikeRepository;
 import BallFan.repository.ReviewPhotoRepository;
 import BallFan.repository.ReviewRepository;
 import BallFan.repository.TicketRepository;
@@ -25,10 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,6 +35,7 @@ import java.util.stream.Collectors;
 public class ReviewService {
 
     private final ReviewPhotoRepository reviewPhotoRepository;
+    private final ReviewLikeRepository reviewLikeRepository;
     @Value("${cloud.aws.s3.bucket}")
     private String DirName;
     private final WebClient webClient2;
@@ -453,9 +453,28 @@ public class ReviewService {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ReviewNotFoundException(REVIEW_NOT_FOUND_MESSAGE));
 
+        Optional<ReviewLike> existingLike = reviewLikeRepository.findByUserIdAndReviewId(user.getId(), review.getId());
+        int likesCount;
 
+        if(existingLike.isPresent()) {
+            reviewLikeRepository.delete(existingLike.get());
+            likesCount = review.getLikes() - 1;
 
+            review.updateLikes(likesCount);
+            reviewRepository.save(review);
 
+        } else {
+            ReviewLike newLike = ReviewLike.builder()
+                    .user(user)
+                    .review(review)
+                    .build();
+            reviewLikeRepository.save(newLike);
 
+            likesCount = review.getLikes() + 1;
+
+            review.updateLikes(likesCount);
+            reviewRepository.save(review);
+
+        }
     }
 }

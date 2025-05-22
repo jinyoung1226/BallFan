@@ -53,4 +53,8 @@ public class Review {
     @Builder.Default
     private List<ReviewPhoto> photos = new ArrayList<>();
 
+    public void updateLikes(int likes) {
+        this.likes = likes;
+    }
+
 }
