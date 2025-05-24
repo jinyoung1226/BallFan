@@ -298,8 +298,8 @@ public class ReviewService {
 
         return AllReviewResponse.builder()
                 .id(review.getId())
-                .nickname(user.getNickname())
-                .image(user.getImage())
+                .nickname(review.getUser().getNickname())
+                .image(review.getUser().getImage())
                 .seat(review.getSeat())
                 .content(review.getContent())
                 .stadium(review.getStadium())
