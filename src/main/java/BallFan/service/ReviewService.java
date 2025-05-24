@@ -439,6 +439,8 @@ public class ReviewService {
 
         ReviewResponse reviewResponse = ReviewResponse.builder()
                 .id(review.getId())
+                .nickname(review.getUser().getNickname())
+                .image(review.getUser().getImage())
                 .seat(review.getSeat())
                 .content(review.getContent())
                 .stadium(review.getStadium())

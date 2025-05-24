@@ -14,6 +14,8 @@ import java.util.List;
 public class ReviewResponse {
 
     private Long id;
+    private String nickname;
+    private String image;
     private String seat;
     private String content;
     private String stadium;
