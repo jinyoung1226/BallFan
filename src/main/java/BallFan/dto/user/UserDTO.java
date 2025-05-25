@@ -24,6 +24,7 @@ public class UserDTO {
         return UserDTO.builder()
                 .id(user.getId())
                 .nickname(user.getNickname())
+                .image(user.getImage())
                 .team(user.getTeam())
                 .currentWinStreak(user.getCurrentWinStreak())
                 .monthlyWinCount(user.getMonthlyWinCount())
