@@ -5,10 +5,12 @@ import BallFan.dto.record.MyWinRateDTO;
 import BallFan.dto.record.UserRankingDTO;
 import BallFan.entity.Ticket;
 import BallFan.entity.user.User;
+import BallFan.exception.ticket.TicketNotFoundException;
 import BallFan.repository.TicketRepository;
 import BallFan.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -144,59 +146,46 @@ public class RecordService {
         return new MyWinRateDTO(winCount, drawCount, loseCount, winRate);
     }
 
-//    private List<UserRankingDTO> calculateRanking(List<User> userList, User user, int rankRange) {
-//        // 1. 연승 기록이 있는 유저만 필터링 (null 제외, 0도 포함)
-//        List<User> filteredUsers = new ArrayList<>();
-//        for (User userOne : userList) {
-//            if(userOne.getCurrentWinStreak() != null){
-//                filteredUsers.add(userOne);
-//            }
-//        }
-//
-//        // 2. 연승(양수), 무승부(0), 연패(음수) 포함해서 내림차순 정렬
-//        filteredUsers.sort(new Comparator<User>() {
-//            @Override
-//            public int compare(User u1, User u2) {
-//                return u2.getCurrentWinStreak() - u1.getCurrentWinStreak();
-//            }
-//        });
-//
-//        // 3. 순위 계산 및 TOP 3 + 내 순위 추출
-//        List<UserRankingDTO> result = new ArrayList<>();
-//        int rank = 1;
-//        UserRankingDTO myRanking = null;
-//
-//        for (User filteredUser : filteredUsers) {
-//            UserRankingDTO userRankingDTO = new UserRankingDTO(
-//                    filteredUser.getId(),
-//                    filteredUser.getNickname(),
-//                    filteredUser.getCurrentWinStreak(),
-//                    rank);
-//
-//            if (user.getId().equals(filteredUser.getId())) {
-//                myRanking = userRankingDTO;
-//            }
-//
-//            if (rank <= rankRange) {
-//                result.add(userRankingDTO);
-//            }
-//
-//            rank++;
-//        }
-//
-//        // 4. 본인이 TOP 3 안에 없으면 내 순위 추가
-//        boolean alreadyIncluded = false;
-//        for (UserRankingDTO dto : result) {
-//            if (myRanking != null && dto.getId().equals(myRanking.getId())) {
-//                alreadyIncluded = true;
-//                break;
-//            }
-//        }
-//
-//        if (!alreadyIncluded && myRanking != null) {
-//            result.add(myRanking);
-//        }
-//
-//        return result;
-//    }
+
+    public UserRankingDTO getVictoryFairy() {
+        User user = userDetailsService.getUserByContextHolder();
+        List<User> allUsers = userRepository.findAll();
+
+        UserRankingDTO topUser = null;
+        int maxWins = -1;
+
+        for (User user1 : allUsers) {
+            List<Ticket> tickets = ticketRepository.findByUserIdAndFavoriteTeam(user1.getId(), user1.getTeam());
+
+            int winCount = 0;
+            int lossCount = 0;
+
+            for (Ticket ticket : tickets) {
+                if ("승".equals(ticket.getIsWin())) {
+                    winCount++;
+                } else if ("패".equals(ticket.getIsWin())) {
+                    lossCount++;
+                }
+            }
+
+            if (winCount > maxWins) {
+                maxWins = winCount;
+                topUser = new UserRankingDTO(
+                        user1.getId(),
+                        user1.getNickname(),
+                        user1.getImage(),
+                        winCount,
+                        lossCount,
+                        1 // 승리 요정은 1등
+                );
+            }
+        }
+
+        if (topUser == null) {
+            throw new TicketNotFoundException("승리 요정을 찾을 수 없습니다.");
+        }
+
+        return topUser;
+
+    }
 }

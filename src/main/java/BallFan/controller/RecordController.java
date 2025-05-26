@@ -36,4 +36,12 @@ public class RecordController {
         return ResponseEntity.ok(appWinRateRanking);
     }
 
+    @GetMapping("/victory-fairy")
+    public ResponseEntity<UserRankingDTO> getVictoryFairy() {
+        UserRankingDTO victoryFairy = recordService.getVictoryFairy();
+        return ResponseEntity.ok(victoryFairy);
+    }
+
+
+
 }
