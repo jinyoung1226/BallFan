@@ -2,6 +2,7 @@ package BallFan.controller;
 
 import BallFan.dto.response.BaseResponse;
 import BallFan.dto.review.AllReviewResponse;
+import BallFan.dto.review.MyReviewResponse;
 import BallFan.dto.review.TotalReviewResponse;
 import BallFan.service.ReviewService;
 import lombok.RequiredArgsConstructor;
@@ -57,8 +58,8 @@ public class ReviewController {
     }
 
     @GetMapping("/my-review")
-    public ResponseEntity<List<AllReviewResponse>> getMyReview() {
-        List<AllReviewResponse> myReview = reviewService.getMyReview();
+    public ResponseEntity<List<MyReviewResponse>> getMyReview() {
+        List<MyReviewResponse> myReview = reviewService.getMyReview();
         return ResponseEntity.ok(myReview);
     }
 }

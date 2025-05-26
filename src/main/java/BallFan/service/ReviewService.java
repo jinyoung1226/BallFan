@@ -511,22 +511,22 @@ public class ReviewService {
         }
     }
 
-    public List<AllReviewResponse> getMyReview() {
+    public List<MyReviewResponse> getMyReview() {
         User user = userDetailsService.getUserByContextHolder();
 
         List<Review> myReview = reviewRepository.findByUserId(user.getId());
         
-        List<AllReviewResponse> allReviewResponse = new ArrayList<>();;
+        List<MyReviewResponse> myReviewResponse = new ArrayList<>();;
 
         for (Review review : myReview) {
-            AllReviewResponse review1 = AllReviewResponse.builder()
+            MyReviewResponse review1 = MyReviewResponse.builder()
                     .id(review.getId())
-                    .createdAt(review.getCreatedAt())
+                    .createdAt(review.getCreatedAt().toLocalDate())
                     .stadium(review.getStadium())
                     .image(review.getPhotos().get(0).getPhotoUrl())
                     .build();
-            allReviewResponse.add(review1);
+            myReviewResponse.add(review1);
         }
-        return allReviewResponse;
+        return myReviewResponse;
     }
 }
