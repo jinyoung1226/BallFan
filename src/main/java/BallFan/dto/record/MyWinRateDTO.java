@@ -14,4 +14,5 @@ public class MyWinRateDTO {
     private int winCount;
     private int drawCount;
     private int loseCount;
+    private int winRate;
 }
