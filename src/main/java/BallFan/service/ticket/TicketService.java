@@ -267,6 +267,9 @@ public class TicketService {
     private List<TicketPreviewDTO> buildTicketPreviewDTO(List<Ticket> tickets) {
         List<TicketPreviewDTO> results = new ArrayList<>();
 
+        // 1. ticketDate 기준 내림차순 정렬
+        tickets.sort((t1, t2) -> t2.getTicketDate().compareTo(t1.getTicketDate()));
+
         for (Ticket ticket : tickets) {
             DayOfWeek dayOfWeek = ticket.getTicketDate().getDayOfWeek();
             String koreanDay = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.KOREAN);
