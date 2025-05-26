@@ -55,4 +55,10 @@ public class ReviewController {
         Page<AllReviewResponse> allReview = reviewService.getAllReview(pageable);
         return ResponseEntity.ok(allReview);
     }
+
+    @GetMapping("/my-review")
+    public ResponseEntity<List<AllReviewResponse>> getMyReview() {
+        List<AllReviewResponse> myReview = reviewService.getMyReview();
+        return ResponseEntity.ok(myReview);
+    }
 }

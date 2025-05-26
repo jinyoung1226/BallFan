@@ -510,4 +510,23 @@ public class ReviewService {
 
         }
     }
+
+    public List<AllReviewResponse> getMyReview() {
+        User user = userDetailsService.getUserByContextHolder();
+
+        List<Review> myReview = reviewRepository.findByUserId(user.getId());
+        
+        List<AllReviewResponse> allReviewResponse = new ArrayList<>();;
+
+        for (Review review : myReview) {
+            AllReviewResponse review1 = AllReviewResponse.builder()
+                    .id(review.getId())
+                    .createdAt(review.getCreatedAt())
+                    .stadium(review.getStadium())
+                    .image(review.getPhotos().get(0).getPhotoUrl())
+                    .build();
+            allReviewResponse.add(review1);
+        }
+        return allReviewResponse;
+    }
 }
