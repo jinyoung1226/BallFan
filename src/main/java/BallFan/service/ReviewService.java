@@ -530,4 +530,24 @@ public class ReviewService {
         }
         return myReviewResponse;
     }
+
+    public List<MyReviewLikesResponse> getMyLikes() {
+        User user = userDetailsService.getUserByContextHolder();
+
+        List<ReviewLike> reviewLikes = reviewLikeRepository.findByUserId(user.getId());
+        List<MyReviewLikesResponse> myReviewLikesResponse = new ArrayList<>();
+
+        for (ReviewLike reviewLike : reviewLikes) {
+            MyReviewLikesResponse build = MyReviewLikesResponse.builder()
+                    .id(reviewLike.getReview().getId())
+                    .createdAt(reviewLike.getReview().getCreatedAt().toLocalDate())
+                    .dayOfWeek(reviewLike.getReview().getCreatedAt().getDayOfWeek().toString())
+                    .stadium(reviewLike.getReview().getStadium())
+                    .image(reviewLike.getReview().getPhotos().get(0).getPhotoUrl())
+                    .liked(true)
+                    .build();
+            myReviewLikesResponse.add(build);
+        }
+        return myReviewLikesResponse;
+    }
 }

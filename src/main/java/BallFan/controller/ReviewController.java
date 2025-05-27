@@ -2,6 +2,7 @@ package BallFan.controller;
 
 import BallFan.dto.response.BaseResponse;
 import BallFan.dto.review.AllReviewResponse;
+import BallFan.dto.review.MyReviewLikesResponse;
 import BallFan.dto.review.MyReviewResponse;
 import BallFan.dto.review.TotalReviewResponse;
 import BallFan.service.ReviewService;
@@ -61,5 +62,11 @@ public class ReviewController {
     public ResponseEntity<List<MyReviewResponse>> getMyReview() {
         List<MyReviewResponse> myReview = reviewService.getMyReview();
         return ResponseEntity.ok(myReview);
+    }
+
+    @GetMapping("/my-likes")
+    public ResponseEntity<List<MyReviewLikesResponse>> getMyLikes() {
+        List<MyReviewLikesResponse> myLikes = reviewService.getMyLikes();
+        return ResponseEntity.ok(myLikes);
     }
 }
