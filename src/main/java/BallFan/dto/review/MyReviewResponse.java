@@ -17,4 +17,5 @@ public class MyReviewResponse {
     private String image;
     private String stadium;
     private LocalDate createdAt;
+    private String dayOfWeek;
 }

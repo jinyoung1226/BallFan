@@ -522,6 +522,7 @@ public class ReviewService {
             MyReviewResponse review1 = MyReviewResponse.builder()
                     .id(review.getId())
                     .createdAt(review.getCreatedAt().toLocalDate())
+                    .dayOfWeek(review.getCreatedAt().getDayOfWeek().toString())
                     .stadium(review.getStadium())
                     .image(review.getPhotos().get(0).getPhotoUrl())
                     .build();
