@@ -56,6 +56,7 @@ public class AuthService {
     public SignInDTO signIn(SignInRequest request) {
         System.out.println(request.getEmail() + " " + request.getPassword());
         Authentication authentication = authenticate(request);
+        System.out.println(authentication.getPrincipal());
         String accessToken = jwtProvider.generateAccessToken(authentication);
         String refreshToken = jwtProvider.generateRefreshToken(authentication);
 
@@ -65,6 +66,7 @@ public class AuthService {
 
         if (principal instanceof UserDetails) {
             String email = ((UserDetails) principal).getUsername();
+            System.out.println(email);
 
             User user = userRepository.findUserByEmail(email).orElse(null);
             if (user != null) {
