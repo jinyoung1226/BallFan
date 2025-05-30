@@ -54,6 +54,7 @@ public class AuthService {
 
 
     public SignInDTO signIn(SignInRequest request) {
+        System.out.println(request.getEmail() + " " + request.getPassword());
         Authentication authentication = authenticate(request);
         String accessToken = jwtProvider.generateAccessToken(authentication);
         String refreshToken = jwtProvider.generateRefreshToken(authentication);
