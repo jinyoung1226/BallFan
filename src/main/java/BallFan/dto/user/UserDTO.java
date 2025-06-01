@@ -17,8 +17,8 @@ public class UserDTO {
     private String nickname;
     private Team team;
     private String image;
-    private int currentWinStreak;
-    private int monthlyWinCount;
+    private Integer currentWinStreak;
+    private Integer monthlyWinCount;
 
     public static UserDTO from(User user) {
         return UserDTO.builder()
