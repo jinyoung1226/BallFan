@@ -43,17 +43,21 @@ public class RecordService {
         User user = userDetailsService.getUserByContextHolder();
         List<User> teamUsers = userRepository.findByTeam(user.getTeam());
 
-        // 유저별 승패 집계 및 정렬
+        // 유저별 승/무/패 집계 및 정렬
         List<UserRankingDTO> rankedList = teamUsers.stream()
                 .map(user1 -> {
                     List<Ticket> tickets = ticketRepository.findByUserIdAndFavoriteTeam(user1.getId(), user1.getTeam());
 
                     int wins = 0;
+                    int draws = 0;
                     int losses = 0;
 
                     for (Ticket ticket : tickets) {
-                        if ("승".equals(ticket.getIsWin())) wins++;
-                        else if ("패".equals(ticket.getIsWin())) losses++;
+                        switch (ticket.getIsWin()) {
+                            case "승" -> wins++;
+                            case "무" -> draws++;
+                            case "패" -> losses++;
+                        }
                     }
 
                     return new UserRankingDTO(
@@ -62,6 +66,7 @@ public class RecordService {
                             user1.getImage(),
                             wins,
                             losses,
+                            draws,
                             0 // 초기 rank
                     );
                 })
@@ -90,13 +95,14 @@ public class RecordService {
                     List<Ticket> tickets = ticketRepository.findByUserIdAndFavoriteTeam(user1.getId(), user1.getTeam());
 
                     int wins = 0;
+                    int draws = 0;
                     int losses = 0;
 
                     for (Ticket ticket : tickets) {
-                        if ("승".equals(ticket.getIsWin())) {
-                            wins++;
-                        } else if ("패".equals(ticket.getIsWin())) {
-                            losses++;
+                        switch (ticket.getIsWin()) {
+                            case "승" -> wins++;
+                            case "무" -> draws++;
+                            case "패" -> losses++;
                         }
                     }
 
@@ -106,7 +112,8 @@ public class RecordService {
                             user1.getImage(),
                             wins,
                             losses,
-                            0 // 초기 순위
+                            draws,
+                            0 // 초기 rank
                     );
                 })
                 .sorted((a, b) -> Integer.compare(b.getWinCount(), a.getWinCount())) // 승 수 기준 내림차순
@@ -158,13 +165,14 @@ public class RecordService {
             List<Ticket> tickets = ticketRepository.findByUserIdAndFavoriteTeam(user1.getId(), user1.getTeam());
 
             int winCount = 0;
+            int drawCount = 0;
             int lossCount = 0;
 
             for (Ticket ticket : tickets) {
-                if ("승".equals(ticket.getIsWin())) {
-                    winCount++;
-                } else if ("패".equals(ticket.getIsWin())) {
-                    lossCount++;
+                switch (ticket.getIsWin()) {
+                    case "승" -> winCount++;
+                    case "무" -> drawCount++;
+                    case "패" -> lossCount++;
                 }
             }
 
@@ -176,6 +184,7 @@ public class RecordService {
                         user1.getImage(),
                         winCount,
                         lossCount,
+                        drawCount,
                         1 // 승리 요정은 1등
                 );
             }
@@ -186,6 +195,5 @@ public class RecordService {
         }
 
         return topUser;
-
     }
 }

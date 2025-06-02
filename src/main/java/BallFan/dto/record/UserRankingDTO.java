@@ -14,5 +14,6 @@ public class UserRankingDTO {
     private String image;
     private int winCount;
     private int lossCount;
+    private int drawCount;
     private int rank;
 }
