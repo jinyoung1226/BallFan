@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -22,6 +23,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 
 @Service
@@ -55,6 +58,12 @@ public class AuthService {
 
     public SignInDTO signIn(SignInRequest request) {
         System.out.println(request.getEmail() + " " + request.getPassword());
+        // 이메일 존재 여부 체크
+        boolean exists = userRepository.existsByEmail(request.getEmail());
+        if (!exists) {
+            throw new DuplicatedSignUpException("존재하지 않는 이메일입니다.");
+        }
+
         Authentication authentication = authenticate(request);
         System.out.println(authentication.getPrincipal());
         String accessToken = jwtProvider.generateAccessToken(authentication);
