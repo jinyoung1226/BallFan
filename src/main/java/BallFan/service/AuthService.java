@@ -63,11 +63,6 @@ public class AuthService {
         User user1 = userRepository.findUserByEmail(request.getEmail())
                 .orElseThrow(() -> new DuplicatedSignUpException("존재하지 않는 이메일입니다."));
 
-        // 비밀번호 대조
-        if (!passwordEncoder.matches(passwordEncoder.encode(request.getPassword()), user1.getPassword())) {
-            throw new DuplicatedSignUpException("비밀번호가 일치하지 않습니다.");
-        }
-
         Authentication authentication = authenticate(request);
         System.out.println(authentication.getPrincipal());
         String accessToken = jwtProvider.generateAccessToken(authentication);
