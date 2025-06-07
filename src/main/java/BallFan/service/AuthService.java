@@ -58,10 +58,14 @@ public class AuthService {
 
     public SignInDTO signIn(SignInRequest request) {
         System.out.println(request.getEmail() + " " + request.getPassword());
+
         // 이메일 존재 여부 체크
-        boolean exists = userRepository.existsByEmail(request.getEmail());
-        if (!exists) {
-            throw new DuplicatedSignUpException("존재하지 않는 이메일입니다.");
+        User user1 = userRepository.findUserByEmail(request.getEmail())
+                .orElseThrow(() -> new DuplicatedSignUpException("존재하지 않는 이메일입니다."));
+
+        // 비밀번호 대조
+        if (!passwordEncoder.matches(request.getPassword(), user1.getPassword())) {
+            throw new DuplicatedSignUpException("비밀번호가 일치하지 않습니다.");
         }
 
         Authentication authentication = authenticate(request);
