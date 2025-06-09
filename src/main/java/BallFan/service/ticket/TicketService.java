@@ -314,7 +314,7 @@ public class TicketService {
             return objectMapper.readValue(response, OcrTicketDTO.class);
 
         } catch (IOException e) {
-            throw new RuntimeException("이미지 전송 실패", e);
+            throw new DuplicatedTicketException("티켓 이미지 업로드 실패");
         }
     }
 
