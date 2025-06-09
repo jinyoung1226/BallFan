@@ -93,14 +93,10 @@ public class AuthService {
     }
 
     public void signOut(String authorizationHeader) {
-        Object userByContextHolder = userDetailsService.getUserByContextHolder();
+        User user = userDetailsService.getUserByContextHolder();
         String refreshToken = tokenService.resolveToken(authorizationHeader);
-
-        if (userByContextHolder instanceof User) {
-            User user = (User) userByContextHolder;
-            tokenRepository.deleteId(user.getId());
-            saveBlackList(refreshToken);
-        }
+        tokenRepository.deleteId(user.getId());
+        saveBlackList(refreshToken);
     }
 
     private void saveBlackList(String refreshToken) {
