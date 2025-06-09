@@ -94,7 +94,9 @@ public class AuthService {
 
     public void signOut(String authorizationHeader) {
         User user = userDetailsService.getUserByContextHolder();
+        System.out.println(user);
         String refreshToken = tokenService.resolveToken(authorizationHeader);
+        System.out.println(refreshToken);
         tokenRepository.deleteId(user.getId());
         saveBlackList(refreshToken);
     }
