@@ -30,10 +30,7 @@ import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.TextStyle;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -167,17 +164,20 @@ public class TicketService {
         Ticket ticket = buildTicket(gameResult, gameDate, seat, isWin, user);
         ticketRepository.save(ticket);
 
-        // 경기장 방문 테이블 저장
-        StadiumVisit stadiumVisit = stadiumVisitRepository.findByUserIdAndStadium(user.getId(), gameResult.getStadium())
-                .orElseGet(() -> stadiumVisitRepository.save(
-                        StadiumVisit.builder()
-                                .user(user)
-                                .visitCount(1)
-                                .stadium(gameResult.getStadium())
-                                .build()
-                ));
-        // 이미 경기장 방문 기록이 있다면, 방문 횟수만 증가
-        stadiumVisit.increaseVisitCount();
+        Optional<StadiumVisit> stadiumVisit = stadiumVisitRepository.findByUserIdAndStadium(user.getId(), gameResult.getStadium());
+        if(!stadiumVisit.isPresent()) {
+            stadiumVisitRepository.save(
+                    StadiumVisit.builder()
+                            .user(user)
+                            .visitCount(1)
+                            .stadium(gameResult.getStadium())
+                            .build()
+            );
+        } else {
+            StadiumVisit stadiumVisit1 = stadiumVisit.get();
+            stadiumVisit1.increaseVisitCount();
+            stadiumVisitRepository.save(stadiumVisit1);
+        }
     }
 
     /**
