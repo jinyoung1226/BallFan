@@ -47,6 +47,7 @@ public class AuthService {
                     .email(request.getEmail())
                     .password(passwordEncoder.encode(request.getPassword()))
                     .nickname(request.getNickname())
+                    .image("https://b-cube-web.s3.ap-northeast-2.amazonaws.com/b-cube-web/default_profile.svg")
                     .team(request.getTeam())
                     .build();
             userRepository.save(user);
