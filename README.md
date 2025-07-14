@@ -39,7 +39,7 @@
 > 이메일, 비밀번호, 닉네임, 마이팀을 입력 받아 회원가입을 진행한다.
 
 <p align="center">
-  <img src="Readme_assets/회원가입.gif" alt="회원가입 기능 시연" width="300px" />
+  <img src="Readme_assets/회원가입.gif" alt="회원가입 기능 시연" width="270px" />
 </p>
 
 ---
@@ -48,7 +48,7 @@
 > 회원가입 시, 가입했던 정보를 바탕으로 로그인을 진행한다.
 
 <p align="center">
-  <img src="Readme_assets/로그인 및 홈화면.gif" alt="로그인 기능 시연" width="300px" />
+  <img src="Readme_assets/로그인 및 홈화면.gif" alt="로그인 기능 시연" width="270px" />
 </p>
 
 ---
@@ -59,7 +59,7 @@
 > 사용자는 홈 화면에서 등록된 티켓을 통해 다양한 경기 정보를 확인할 수 있다.
 
 <p align="center">
-  <img src="Readme_assets/티켓 등록 및 확인.gif" alt="OCR 티켓 등록 시연" width="300px" />
+  <img src="Readme_assets/티켓 등록 및 확인.gif" alt="OCR 티켓 등록 시연" width="270px" />
 </p>
 
 ---
@@ -75,11 +75,11 @@
 > 8. 이를 통해 사용자들은 유사 좌석에 대한 시야나 분위기 등의 정보를 간접적으로 파악할 수 있다.
 
 <p align="center">
-  <img src="Readme_assets/티켓 리뷰 등록.gif" alt="티켓 리뷰 등록" width="300px" />
-  <img src="Readme_assets/티켓 리뷰 확인.gif" alt="티켓 리뷰 확인" width="300px" />
+  <img src="Readme_assets/티켓 리뷰 등록.gif" alt="티켓 리뷰 등록" width="270px" />
+  <img src="Readme_assets/티켓 리뷰 확인.gif" alt="티켓 리뷰 확인" width="270px" />
 </p>
 <p align="center">
-  <img src="Readme_assets/리뷰 확인.gif" alt="리뷰 분석 결과 확인" width="300px" />
+  <img src="Readme_assets/리뷰 확인.gif" alt="리뷰 분석 결과 확인" width="270px" />
 </p>
 
 ---
@@ -92,8 +92,8 @@
 > 경기장을 방문할 때마다 스탬프가 지급되어 사용자에게 기록과 수집의 재미를 제공한다.
 
 <p align="center">
-  <img src="Readme_assets/명예의 전당 승률 확인.gif" alt="승률 확인" width="300px" />
-  <img src="Readme_assets/명예의 전당 방문경기장.gif" alt="방문 경기장 확인" width="300px" />
+  <img src="Readme_assets/명예의 전당 승률 확인.gif" alt="승률 확인" width="270px" />
+  <img src="Readme_assets/명예의 전당 방문경기장.gif" alt="방문 경기장 확인" width="270px" />
 </p>
 
 ---
@@ -103,16 +103,16 @@
 > 자신의 닉네임 및 프로필 사진을 변경할 수 있다.
 
 <p align="center">
-  <img src="Readme_assets/마이홈 리뷰 확인.gif" alt="리뷰 확인" width="300px" />
-  <img src="Readme_assets/마이홈 정보 수정.gif" alt="프로필 수정" width="300px" />
+  <img src="Readme_assets/마이홈 리뷰 확인.gif" alt="리뷰 확인" width="270px" />
+  <img src="Readme_assets/마이홈 정보 수정.gif" alt="프로필 수정" width="270px" />
 </p>
 
 > 마이홈에서 자신이 좋아요를 누른 리뷰를 확인할 수 있다.  
 > 앱을 종료하고 싶다면 로그아웃을 진행한다.
 
 <p align="center">
-  <img src="Readme_assets/마이홈 스크랩.gif" alt="스크랩 리뷰" width="300px" />
-  <img src="Readme_assets/로그아웃.gif" alt="로그아웃" width="300px" />
+  <img src="Readme_assets/마이홈 스크랩.gif" alt="스크랩 리뷰" width="270px" />
+  <img src="Readme_assets/로그아웃.gif" alt="로그아웃" width="270px" />
 </p>
 
 
