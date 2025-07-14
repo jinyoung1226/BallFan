@@ -38,13 +38,13 @@
 - **회원가입 및 마이팀 설정**
 > 이메일, 비밀번호, 닉네임, 마이팀을 입력 받아 회원가입을 진행한다.
 <div align="center">
-  <img src="Readme_assets/회원가입.gif" alt="회원가입 기능 시연" width="60%" />
+  <img src="Readme_assets/회원가입.gif" alt="회원가입 기능 시연" width="300px" />
 </div>
 
 - **로그인 및 홈 화면(티켓 저장소)**
 > 회원가입 시, 가입했던 정보를 바탕으로 로그인을 진행한다. 
 <div align="center">
-  <img src="Readme_assets/로그인 및 홈화면.gif" alt="회원가입 기능 시연" width="60%" />
+  <img src="Readme_assets/로그인 및 홈화면.gif" alt="회원가입 기능 시연" width="300px" />
 </div>
 
 - **OCR 기반 티켓 등록 및 확인**
@@ -54,7 +54,7 @@
 >
 > 사용자는 홈 화면에서 등록된 티켓을 통해 다양한 경기 정보를 확인할 수 있다.
 <div align="center">
-  <img src="Readme_assets/티켓 등록 및 확인.gif" alt="회원가입 기능 시연" width="60%" />
+  <img src="Readme_assets/티켓 등록 및 확인.gif" alt="회원가입 기능 시연" width="300px" />
 </div>
 
 - **티켓 리뷰 등록 및 확인**
@@ -76,11 +76,11 @@
 > 8. 이를 통해 사용자들은 유사 좌석에 대한 시야나 분위기 등의 정보를 간접적으로 파악할 수 있다. 
 
 <div align="center" style="display: flex; justify-content: center; gap: 20px; margin-bottom: 10px;">
-  <img src="Readme_assets/티켓 리뷰 등록.gif" alt="티켓 등록 기능 시연" width="45%" />
-  <img src="Readme_assets/티켓 리뷰 확인.gif" alt="티켓 정보 확인 시연" width="45%" />
+  <img src="Readme_assets/티켓 리뷰 등록.gif" alt="티켓 등록 기능 시연" width="300px" />
+  <img src="Readme_assets/티켓 리뷰 확인.gif" alt="티켓 정보 확인 시연" width="300px" />
 </div>
 <div align="center" style="display: flex; justify-content: center; gap: 20px;">
-  <img src="Readme_assets/리뷰 확인.gif" alt="티켓 등록 기능 시연" width="45%" />
+  <img src="Readme_assets/리뷰 확인.gif" alt="티켓 등록 기능 시연" width="300px" />
 </div>
 
 
@@ -97,8 +97,8 @@
 > 경기장을 방문할 때마다 스탬프가 지급되어 사용자에게 기록과 수집의 재미를 제공한다.
 
 <div align="center" style="display: flex; justify-content: center; gap: 20px; margin-bottom: 10px;">
-  <img src="Readme_assets/명예의 전당 승률 확인.gif" alt="티켓 정보 확인 시연" width="45%" />
-  <img src="Readme_assets/명예의 전당 방문경기장.gif" alt="티켓 등록 기능 시연" width="45%" />
+  <img src="Readme_assets/명예의 전당 승률 확인.gif" alt="티켓 정보 확인 시연" width="300px" />
+  <img src="Readme_assets/명예의 전당 방문경기장.gif" alt="티켓 등록 기능 시연" width="300px" />
 </div>
 
 - **마이 홈(내 리뷰 확인 및 프로필 수정)**
@@ -108,8 +108,8 @@
 > 자신의 닉네임 및 프로필 사진을 변경할 수 있다.
 
 <div align="center" style="display: flex; justify-content: center; gap: 20px; margin-bottom: 10px;">
-  <img src="Readme_assets/마이홈 리뷰 확인.gif" alt="티켓 정보 확인 시연" width="45%" />
-  <img src="Readme_assets/마이홈 정보 수정.gif" alt="티켓 등록 기능 시연" width="45%" />
+  <img src="Readme_assets/마이홈 리뷰 확인.gif" alt="티켓 정보 확인 시연" width="300px" />
+  <img src="Readme_assets/마이홈 정보 수정.gif" alt="티켓 등록 기능 시연" width="300px" />
 </div>
 
 > 마이홈에서 자신이 좋아요를 누른 리뷰를 확인할 수 있다.
@@ -117,8 +117,8 @@
 > 앱을 종료하고 싶다면 로그아웃을 진행한다.
 
 <div align="center" style="display: flex; justify-content: center; gap: 20px; margin-bottom: 10px;">
-  <img src="Readme_assets/마이홈 스크랩.gif" alt="티켓 정보 확인 시연" width="45%" />
-  <img src="Readme_assets/로그아웃.gif" alt="티켓 등록 기능 시연" width="45%" />
+  <img src="Readme_assets/마이홈 스크랩.gif" alt="티켓 정보 확인 시연" width="300px" />
+  <img src="Readme_assets/로그아웃.gif" alt="티켓 등록 기능 시연" width="300px" />
 </div>
 
 
@@ -149,7 +149,7 @@
     <img src="https://img.shields.io/badge/OpenAI-412991?style=flat-square&logo=openai&logoColor=white"/>
     <img src="https://img.shields.io/badge/Chroma DB-512BD4?style=flat-square&logo=&logoColor=white"/>
     <img src="https://img.shields.io/badge/Naver Search API-03C75A?style=flat-square&logo=naver&logoColor=white"/>
-
+    <img src="https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=Fastapi&logoColor=white"/>
 </p> 
 
 ### DB
