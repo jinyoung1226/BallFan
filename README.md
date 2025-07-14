@@ -37,89 +37,83 @@
 
 - **회원가입 및 마이팀 설정**
 > 이메일, 비밀번호, 닉네임, 마이팀을 입력 받아 회원가입을 진행한다.
-<div align="center">
+
+<p align="center">
   <img src="Readme_assets/회원가입.gif" alt="회원가입 기능 시연" width="300px" />
-</div>
+</p>
+
+---
 
 - **로그인 및 홈 화면(티켓 저장소)**
-> 회원가입 시, 가입했던 정보를 바탕으로 로그인을 진행한다. 
-<div align="center">
-  <img src="Readme_assets/로그인 및 홈화면.gif" alt="회원가입 기능 시연" width="300px" />
-</div>
+> 회원가입 시, 가입했던 정보를 바탕으로 로그인을 진행한다.
+
+<p align="center">
+  <img src="Readme_assets/로그인 및 홈화면.gif" alt="로그인 기능 시연" width="300px" />
+</p>
+
+---
 
 - **OCR 기반 티켓 등록 및 확인**
-> PaddleOCR(GPU 기반)을 활용해 티켓 사진에서 경기 날짜와 원정팀 정보를 추출한다.
-> 
-> 추출한 정보를 기반으로, 스탯티즈 야구 기록 사이트에서 자동 크롤링한 경기 데이터와 매핑하여 티켓을 저장한다.
->
+> PaddleOCR(GPU 기반)을 활용해 티켓 사진에서 경기 날짜와 원정팀 정보를 추출한다.  
+> 추출한 정보를 기반으로, 스탯티즈 야구 기록 사이트에서 자동 크롤링한 경기 데이터와 매핑하여 티켓을 저장한다.  
 > 사용자는 홈 화면에서 등록된 티켓을 통해 다양한 경기 정보를 확인할 수 있다.
-<div align="center">
-  <img src="Readme_assets/티켓 등록 및 확인.gif" alt="회원가입 기능 시연" width="300px" />
-</div>
+
+<p align="center">
+  <img src="Readme_assets/티켓 등록 및 확인.gif" alt="OCR 티켓 등록 시연" width="300px" />
+</p>
+
+---
 
 - **티켓 리뷰 등록 및 확인**
-
 > 1. 사용자가 입력한 티켓 리뷰 텍스트를 OpenAI 임베딩 모델로 벡터화하여 Chroma DB에 저장한다.
-> 
 > 2. 리뷰와 함께 입력된 좌석 정보도 함께 저장되어 이후 추천 기준으로 활용한다.
-> 
 > 3. 리뷰 텍스트를 LangChain을 통해 분석하고, OpenAI와 Naver Search API를 이용해 리뷰에서 장소 관련 키워드를 추출한다.
-> 
 > 4. 추출된 장소 키워드를 기반으로 Naver Search API에서 해당 장소의 위경도 정보를 받아온다.
-> 
 > 5. 위경도 정보를 프론트로 전달하여 Naver Map API를 통해 지도에 해당 장소를 시각화한다.
-> 
 > 6. 저장된 리뷰 벡터와 좌석 정보를 기반으로, 유사한 좌석 리뷰나 내용이 비슷한 리뷰를 사용자에게 추천한다.
-> 
 > 7. 리뷰 텍스트를 기반으로 LLM이 분석하여 리뷰에 어울리는 키워드 역시 추천한다.
-> 
-> 8. 이를 통해 사용자들은 유사 좌석에 대한 시야나 분위기 등의 정보를 간접적으로 파악할 수 있다. 
+> 8. 이를 통해 사용자들은 유사 좌석에 대한 시야나 분위기 등의 정보를 간접적으로 파악할 수 있다.
 
-<div align="center" style="display: flex; justify-content: center; gap: 20px; margin-bottom: 10px;">
-  <img src="Readme_assets/티켓 리뷰 등록.gif" alt="티켓 등록 기능 시연" width="300px" />
-  <img src="Readme_assets/티켓 리뷰 확인.gif" alt="티켓 정보 확인 시연" width="300px" />
-</div>
-<div align="center" style="display: flex; justify-content: center; gap: 20px;">
-  <img src="Readme_assets/리뷰 확인.gif" alt="티켓 등록 기능 시연" width="300px" />
-</div>
+<p align="center">
+  <img src="Readme_assets/티켓 리뷰 등록.gif" alt="티켓 리뷰 등록" width="300px" />
+  <img src="Readme_assets/티켓 리뷰 확인.gif" alt="티켓 리뷰 확인" width="300px" />
+</p>
+<p align="center">
+  <img src="Readme_assets/리뷰 확인.gif" alt="리뷰 분석 결과 확인" width="300px" />
+</p>
 
+---
 
 - **명예의 전당(승률 및 방문 경기장)**
-
-> 사용자가 설정한 응원 팀 기준으로, 팀 내 유저들의 직관 승률을 비교하여 최고 승요를 확인할 수 있다.
-> 
-> 월간 기준으로 가장 높은 승률을 기록한 유저를 ‘이달의 승요’로 표시한다.
-> 
-> 전체 사용자 중 승률이 가장 높은 유저를 조회할 수 있는 기능을 제공한다.
-> 
-> 사용자가 방문한 모든 경기장 목록과 각 경기장별 방문 횟수를 확인할 수 있다.
-> 
+> 사용자가 설정한 응원 팀 기준으로, 팀 내 유저들의 직관 승률을 비교하여 최고 승요를 확인할 수 있다.  
+> 월간 기준으로 가장 높은 승률을 기록한 유저를 ‘이달의 승요’로 표시한다.  
+> 전체 사용자 중 승률이 가장 높은 유저를 조회할 수 있는 기능을 제공한다.  
+> 사용자가 방문한 모든 경기장 목록과 각 경기장별 방문 횟수를 확인할 수 있다.  
 > 경기장을 방문할 때마다 스탬프가 지급되어 사용자에게 기록과 수집의 재미를 제공한다.
 
-<div align="center" style="display: flex; justify-content: center; gap: 20px; margin-bottom: 10px;">
-  <img src="Readme_assets/명예의 전당 승률 확인.gif" alt="티켓 정보 확인 시연" width="300px" />
-  <img src="Readme_assets/명예의 전당 방문경기장.gif" alt="티켓 등록 기능 시연" width="300px" />
-</div>
+<p align="center">
+  <img src="Readme_assets/명예의 전당 승률 확인.gif" alt="승률 확인" width="300px" />
+  <img src="Readme_assets/명예의 전당 방문경기장.gif" alt="방문 경기장 확인" width="300px" />
+</p>
+
+---
 
 - **마이 홈(내 리뷰 확인 및 프로필 수정)**
-
-> 마이홈에서 자신이 작성한 리뷰를 모아서 확인할 수 있다.
-> 
+> 마이홈에서 자신이 작성한 리뷰를 모아서 확인할 수 있다.  
 > 자신의 닉네임 및 프로필 사진을 변경할 수 있다.
 
-<div align="center" style="display: flex; justify-content: center; gap: 20px; margin-bottom: 10px;">
-  <img src="Readme_assets/마이홈 리뷰 확인.gif" alt="티켓 정보 확인 시연" width="300px" />
-  <img src="Readme_assets/마이홈 정보 수정.gif" alt="티켓 등록 기능 시연" width="300px" />
-</div>
+<p align="center">
+  <img src="Readme_assets/마이홈 리뷰 확인.gif" alt="리뷰 확인" width="300px" />
+  <img src="Readme_assets/마이홈 정보 수정.gif" alt="프로필 수정" width="300px" />
+</p>
 
-> 마이홈에서 자신이 좋아요를 누른 리뷰를 확인할 수 있다.
->
+> 마이홈에서 자신이 좋아요를 누른 리뷰를 확인할 수 있다.  
 > 앱을 종료하고 싶다면 로그아웃을 진행한다.
 
-<div align="center" style="display: flex; justify-content: center; gap: 20px; margin-bottom: 10px;">
-  <img src="Readme_assets/마이홈 스크랩.gif" alt="티켓 정보 확인 시연" width="300px" />
-  <img src="Readme_assets/로그아웃.gif" alt="티켓 등록 기능 시연" width="300px" />
-</div>
+<p align="center">
+  <img src="Readme_assets/마이홈 스크랩.gif" alt="스크랩 리뷰" width="300px" />
+  <img src="Readme_assets/로그아웃.gif" alt="로그아웃" width="300px" />
+</p>
 
 
 ## 🛠 기술 스택
